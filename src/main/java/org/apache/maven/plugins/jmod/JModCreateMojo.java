@@ -321,6 +321,67 @@ public class JModCreateMojo
         modsFolder.mkdirs();
 
         this.modulePaths = new ArrayList<>();
+
+        Collection<File> dependencyArtifacts = getCompileClasspathElements( getProject() );
+
+        ResolvePathsRequest<File> request = ResolvePathsRequest.ofFiles( dependencyArtifacts );
+        Toolchain toolchain = getToolchain();
+        if ( toolchain != null && toolchain instanceof DefaultJavaToolChain )
+        {
+            request.setJdkHome( new File( ( (DefaultJavaToolChain) toolchain ).getJavaHome() ) );
+        }
+
+        ResolvePathsResult<File> resolvePathsResult;
+        try
+        {
+            resolvePathsResult = locationManager.resolvePaths( request );
+            for ( Entry<File, Exception> pathException : resolvePathsResult.getPathExceptions().entrySet() )
+            {
+                Throwable cause = pathException.getValue().getCause();
+                while ( cause.getCause() != null )
+                {
+                    cause = cause.getCause();
+                }
+                String fileName = pathException.getKey().getName();
+                getLog().warn( "Can't extract module name from " + fileName + ": " + cause.getMessage() );
+            }
+
+            JavaModuleDescriptor moduleDescriptor = resolvePathsResult.getMainModuleDescriptor();
+
+            for ( Map.Entry<File, ModuleNameSource> entry : resolvePathsResult.getModulepathElements().entrySet() )
+            {
+                if ( ModuleNameSource.FILENAME.equals( entry.getValue() ) )
+                {
+                    final String message = "Required filename-based automodules detected. "
+                        + "Please don't publish this project to a public artifact repository!";
+
+                    if ( moduleDescriptor.exports().isEmpty() )
+                    {
+                        // application
+                        getLog().info( message );
+                    }
+                    else
+                    {
+                        // library
+                        writeBoxedWarning( message );
+                    }
+                    break;
+                }
+            }
+
+            for ( Map.Entry<File, JavaModuleDescriptor> entry : resolvePathsResult.getPathElements().entrySet() )
+            {
+                pathElements.put( entry.getKey().getPath(), entry.getValue() );
+            }
+
+        }
+        catch ( IOException e )
+        {
+            getLog().error( e.getMessage() );
+            throw new MojoExecutionException( e.getMessage() );
+        }
+
+        getLog().info( "pathElements:" + pathElements );
         for ( Entry<String, JavaModuleDescriptor> item : pathElements.entrySet() )
         {
             // Isn't there a better solution?
@@ -473,7 +534,7 @@ public class JModCreateMojo
             {
                 Collection<File> dependencyArtifacts = getCompileClasspathElements( getProject() );
 
-                ResolvePathsRequest<File> request = ResolvePathsRequest.withFiles( dependencyArtifacts );
+                ResolvePathsRequest<File> request = ResolvePathsRequest.ofFiles( dependencyArtifacts );
 
                 Toolchain toolchain = getToolchain();
                 if ( toolchain != null && toolchain instanceof DefaultJavaToolChain )
@@ -562,7 +623,7 @@ public class JModCreateMojo
         if ( !pathElements.isEmpty() )
         {
             argsFile.println( "--class-path" );
-            //TODO: Can't this be achieved in a more elegant way?
+            // TODO: Can't this be achieved in a more elegant way?
             // the classpathElements do not contain the needed information?
             ArrayList<String> x = new ArrayList<>();
             for ( String string : pathElements.keySet() )
@@ -576,7 +637,10 @@ public class JModCreateMojo
         {
             argsFile.println( "--exclude" );
             String commaSeparatedList = getCommaSeparatedList( excludes );
-            argsFile.append( '"' ).append( commaSeparatedList.replace( "\\", "\\\\" ) ).println( '"' );
+            argsFile //
+                     .append( '"' ) //
+                     .append( commaSeparatedList.replace( "\\", "\\\\" ) ) //
+                     .println( '"' );
         }
 
         List<String> configList = handleConfigurationListWithDefault( configs, DEFAULT_CONFIG_DIRECTORY );
@@ -626,13 +690,9 @@ public class JModCreateMojo
 
         if ( modulePaths != null )
         {
-            //@formatter:off
             argsFile.println( "--module-path" );
-            argsFile
-              .append( '"' )
-              .append( getPlatformSeparatedList( modulePaths ).replace( "\\", "\\\\" ) ) 
-              .println( '"' );
-            //@formatter:off
+            argsFile.append( '"' ).append( getPlatformSeparatedList( modulePaths ).replace( "\\",
+                                                                                            "\\\\" ) ).println( '"' );
         }
 
         if ( targetPlatform != null )
@@ -726,7 +786,7 @@ public class JModCreateMojo
     {
         String line = StringUtils.repeat( "*", message.length() + 4 );
         getLog().warn( line );
-        getLog().warn( "* " + MessageUtils.buffer().strong( message )  + " *" );
+        getLog().warn( "* " + MessageUtils.buffer().strong( message ) + " *" );
         getLog().warn( line );
     }
 
