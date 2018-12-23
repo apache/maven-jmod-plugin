@@ -84,8 +84,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jmod-plugin</artifactId>
-                <!--<version>@project.version@</version> -->
-                <version>3.0.0-alpha-2-SNAPSHOT</version>
+                <version>@project.version@</version>
                 <extensions>true</extensions>
             </plugin>
         </plugins>
