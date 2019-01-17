@@ -587,7 +587,7 @@ public class JModCreateMojo
             argsFile.println( getPlatformSeparatedList( configList ) );
         }
 
-        if ( mainClass != null && !mainClass.trim().isEmpty() )
+        if ( StringUtils.isNotBlank( mainClass ) )
         {
             argsFile.println( "--main-class" );
             argsFile.println( mainClass );

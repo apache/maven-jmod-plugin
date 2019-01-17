@@ -20,133 +20,79 @@
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 
+def validateArtifact( String module, List<String> artifactNames )
+{
+    println( "Checking if ${basedir}/${module}/target exists." )
+    File target = new File( basedir, "/${module}/target" )
+    assert target.isDirectory()
 
-try {
-    println("Checking if ${basedir}/world/target exists.")
-    File target = new File( basedir, "/world/target" )
-    if ( !target.exists() || !target.isDirectory() ) {
-        System.err.println( "${target.getAbsolutePath()} folder is missing or not a directory." )
-        return false
-    }
-
-    File artifact = new File( target, "/jmods/myproject.world.jmod" )
-    if ( !artifact.exists() || artifact.isDirectory() ) {
-        System.err.println( "${artifact.getAbsolutePath()} file is missing or a directory." )
-        return false
-    }
-
-    String[] artifactNames = [
-            "classes/module-info.class",
-            "classes/myproject/world/World.class"
-    ]
+    File artifact = new File( target, "/jmods/myproject.${module}.jmod" )
+    assert artifact.isFile()
 
     Set contents = new HashSet()
 
     JarFile jar = new JarFile( artifact )
     Enumeration jarEntries = jar.entries()
-    while ( jarEntries.hasMoreElements() ) {
+    while ( jarEntries.hasMoreElements() )
+    {
         JarEntry entry = (JarEntry) jarEntries.nextElement()
-        println("Current entry: ${entry}")
-        if ( !entry.isDirectory() ) {
+        println( "Current entry: ${entry}" )
+        if ( !entry.isDirectory() )
+        {
             // Only compare files
             contents.add( entry.getName() )
         }
     }
 
-    if  ( artifactNames.length != contents.size() ) {
-        System.err.println( "jar content size is different from the expected content size" )
-        return false
-    }
+    assert artifactNames.size() == contents.size()
+
     artifactNames.each{ artifactName ->
-        if ( !contents.contains( artifactName ) ) {
-            System.err.println( "Artifact[" + artifactName + "] not found in jar archive" )
-            return false
-        }
+        assert contents.contains( artifactName )
     }
-} catch ( Throwable e ) {
-    e.printStackTrace()
-    return false
 }
 
-try {
-    println("Checking if ${basedir}/greetings/target exists.")
-    File target = new File( basedir, "/greetings/target" )
-    if ( !target.exists() || !target.isDirectory() ) {
-        System.err.println( "${target.getAbsolutePath()} folder is missing or not a directory." )
-        return false
-    }
+validateArtifact( "world", [ "classes/module-info.class", "classes/myproject/world/World.class" ] )
+validateArtifact( "greetings", [ "classes/module-info.class", "classes/myproject/greetings/Main.class" ] )
 
-    File artifact = new File( target, "/jmods/myproject.greetings.jmod" )
-    if ( !artifact.exists() || artifact.isDirectory() ) {
-        System.err.println( "${artifact.getAbsolutePath()} file is missing or a directory." )
-        return false
-    }
-
-    String[] artifactNames = [
-            "classes/module-info.class",
-            "classes/myproject/greetings/Main.class"
-    ]
-
-    Set contents = new HashSet()
-
-    JarFile jar = new JarFile( artifact )
-    Enumeration jarEntries = jar.entries()
-    while ( jarEntries.hasMoreElements() ) {
-        JarEntry entry = (JarEntry) jarEntries.nextElement()
-        println("Current entry: ${entry}")
-        if ( !entry.isDirectory() ) {
-            // Only compare files
-            contents.add( entry.getName() )
-        }
-    }
-
-    if  ( artifactNames.length != contents.size() ) {
-        System.err.println( "jar content size is different from the expected content size" )
-        return false
-    }
-    artifactNames.each{ artifactName ->
-        if ( !contents.contains( artifactName ) ) {
-            System.err.println( "Artifact[" + artifactName + "] not found in jar archive" )
+def sout = new StringBuilder(), serr = new StringBuilder()
+def proc = "jmod describe ${basedir}/greetings/target/jmods/myproject.greetings.jmod".execute()
+proc.consumeProcessOutput( sout, serr )
+proc.waitForOrKill( 1000 )
+if ( ! sout.toString().trim().isEmpty() && serr.toString().trim().isEmpty() )
+{
+    Set<String> expectedLines = new HashSet(
+            Arrays.asList(
+                    "myproject.greetings@99.0",
+                    "requires java.base mandated",
+                    "requires myproject.world",
+                    "contains myproject.greetings",
+                    "main-class myproject.greetings.Main" ) )
+    String[] lines = sout.toString().split("\n")
+    for ( String line : lines )
+    {
+        if ( ! line.trim().isEmpty() && !expectedLines.contains(line) )
+        {
+            System.err.println( "This line was not returned from jmod: ${line}" )
             return false
         }
+        else
+        {
+            expectedLines.remove(line)
+        }
     }
-
-    def sout = new StringBuilder(), serr = new StringBuilder()
-    def proc = "jmod describe ${target}/jmods/myproject.greetings.jmod".execute()
-    proc.consumeProcessOutput(sout, serr)
-    proc.waitForOrKill(1000)
-    if (!sout.toString().trim().isEmpty() && serr.toString().trim().isEmpty()) {
-        Set<String> expectedLines = new HashSet(Arrays.asList("myproject.greetings@99.0",
-                "requires java.base mandated",
-                "requires myproject.world",
-                "contains myproject.greetings",
-                "main-class myproject.greetings.Main"))
-        String[] lines = sout.toString().split("\n")
-        for (String line : lines) {
-            if (!line.trim().isEmpty() && !expectedLines.contains(line)) {
-                System.err.println( "This line was not returned from jmod: ${line}" )
-                return false
-            } else {
-                expectedLines.remove(line)
-            }
+    if (!expectedLines.isEmpty()) {
+        System.err.println( "This module does not the following items:" )
+        for ( String line : expectedLines )
+        {
+            System.err.println( line )
         }
-        if (!expectedLines.isEmpty()) {
-            System.err.println( "This module does not the following items:" )
-            for (String line : expectedLines) {
-                System.err.println( line )
-            }
-            return false
-        }
-        return true
-    } else {
-        System.err.println( "Some error happened while trying to run 'jmod describe "
-                + "${target}/jmods/myproject.greetings.jmod'" )
-        System.err.println(serr)
         return false
     }
-} catch ( Throwable e ) {
-    e.printStackTrace()
+}
+else
+{
+    System.err.println( "Some error happened while trying to run 'jmod describe "
+            + "${target}/jmods/myproject.greetings.jmod'" )
+    System.err.println( serr )
     return false
 }
-
-return true
