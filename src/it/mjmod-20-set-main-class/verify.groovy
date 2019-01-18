@@ -20,13 +20,33 @@
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 
-def validateArtifact( String module, List<String> artifactNames )
+validateArtifact( "world", [ "classes/module-info.class", "classes/myproject/world/World.class" ] )
+validateArtifact( "greetings", [ "classes/module-info.class", "classes/myproject/greetings/Main.class" ] )
+
+def buildLog = new File(basedir,'build.log')
+
+def describeLines = buildLog.readLines()
+                            .dropWhile{ it != '[INFO] myproject.greetings@99.0' } // start line, inclusive
+                            .takeWhile{ !it.startsWith('[INFO] ---') }            // end line, inclusive
+                            .grep()                                               // remove empty lines
+                            .collect{ it - '[INFO] ' } as Set                        // strip loglevel
+
+def expectedLines = [
+                "myproject.greetings@99.0",
+                "requires java.base mandated",
+                "requires myproject.world",
+                "contains myproject.greetings",
+                "main-class myproject.greetings.Main"] as Set
+
+assert describeLines == expectedLines
+
+def validateArtifact(module, artifactNames)
 {
     println( "Checking if ${basedir}/${module}/target exists." )
-    File target = new File( basedir, "/${module}/target" )
-    assert target.isDirectory()
+    def targetDir = new File( basedir, "/${module}/target" )
+    assert targetDir.isDirectory()
 
-    File artifact = new File( target, "/jmods/myproject.${module}.jmod" )
+    File artifact = new File( targetDir, "/jmods/myproject.${module}.jmod" )
     assert artifact.isFile()
 
     Set contents = new HashSet()
@@ -49,50 +69,4 @@ def validateArtifact( String module, List<String> artifactNames )
     artifactNames.each{ artifactName ->
         assert contents.contains( artifactName )
     }
-}
-
-validateArtifact( "world", [ "classes/module-info.class", "classes/myproject/world/World.class" ] )
-validateArtifact( "greetings", [ "classes/module-info.class", "classes/myproject/greetings/Main.class" ] )
-
-def sout = new StringBuilder(), serr = new StringBuilder()
-def proc = "jmod describe ${basedir}/greetings/target/jmods/myproject.greetings.jmod".execute()
-proc.consumeProcessOutput( sout, serr )
-proc.waitForOrKill( 1000 )
-if ( ! sout.toString().trim().isEmpty() && serr.toString().trim().isEmpty() )
-{
-    Set<String> expectedLines = new HashSet(
-            Arrays.asList(
-                    "myproject.greetings@99.0",
-                    "requires java.base mandated",
-                    "requires myproject.world",
-                    "contains myproject.greetings",
-                    "main-class myproject.greetings.Main" ) )
-    String[] lines = sout.toString().split("\n")
-    for ( String line : lines )
-    {
-        if ( ! line.trim().isEmpty() && !expectedLines.contains(line) )
-        {
-            System.err.println( "This line was not returned from jmod: ${line}" )
-            return false
-        }
-        else
-        {
-            expectedLines.remove(line)
-        }
-    }
-    if (!expectedLines.isEmpty()) {
-        System.err.println( "This module does not the following items:" )
-        for ( String line : expectedLines )
-        {
-            System.err.println( line )
-        }
-        return false
-    }
-}
-else
-{
-    System.err.println( "Some error happened while trying to run 'jmod describe "
-            + "${target}/jmods/myproject.greetings.jmod'" )
-    System.err.println( serr )
-    return false
 }
