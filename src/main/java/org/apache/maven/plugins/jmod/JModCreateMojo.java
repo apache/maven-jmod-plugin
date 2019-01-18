@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -283,6 +284,15 @@ public class JModCreateMojo
 
     private List<String> modulePaths;
 
+    /**
+     * Define the value for the parameter <code>--class-path &lt;path&gt;</code>, which is used when generating
+     * a jmod file from a JAR.
+     *
+     * Example: <code>jmod create --class-path &lt;JAR location&gt; &lt;full jmod destination path&gt;</code>
+     */
+    // @Parameter
+    private String classPath = "";
+
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
@@ -321,21 +331,52 @@ public class JModCreateMojo
         modsFolder.mkdirs();
 
         this.modulePaths = new ArrayList<>();
-        for ( Entry<String, JavaModuleDescriptor> item : pathElements.entrySet() )
+
+        if ( pathElements != null && !pathElements.isEmpty() )
         {
-            // Isn't there a better solution?
-            if ( item.getValue() == null )
+            for ( Entry<String, JavaModuleDescriptor> item : pathElements.entrySet() )
             {
-                String message = "The given dependency " + item.getKey()
-                    + " does not have a module-info.java file. So it can't be linked.";
-                getLog().error( message );
-                throw new MojoFailureException( message );
+                // Isn't there a better solution?
+                if ( item.getValue() == null )
+                {
+                    String message = "The given dependency " + item.getKey()
+                            + " does not have a module-info.java file. So it can't be linked.";
+                    getLog().error( message );
+                    throw new MojoFailureException( message );
+                }
+                getLog().debug( "pathElements Item:" + item.getKey() + " v:" + item.getValue().name() );
+                getLog().info( " -> module: " + item.getValue().name() + " ( " + item.getKey() + " )" );
+                // We use the real module name and not the artifact Id...
+                this.modulePaths.add( item.getKey() );
             }
-            getLog().debug( "pathElements Item:" + item.getKey() + " v:" + item.getValue().name() );
-            getLog().info( " -> module: " + item.getValue().name() + " ( " + item.getKey() + " )" );
-            // We use the real module name and not the artifact Id...
-            this.modulePaths.add( item.getKey() );
         }
+        /* else if ( classPath == null || classPath.trim().isEmpty() )
+        {
+            throw new MojoExecutionException( "You must either have a module in your project or the "
+                    + "'classPath' configuration set in 'maven-jmod-plugin' configuration section." );
+        } */
+        else
+        {
+            // TODO: can I improve this?
+            if ( getProject().getDependencyArtifacts().isEmpty() )
+            {
+                throw new MojoExecutionException( "You must either have a module in your project or at "
+                        + "least one JAR/JMOD in the dependency's list." );
+            }
+            String separator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
+            StringBuilder builder = new StringBuilder();
+            int i = 0;
+            for ( Artifact artifact : getProject().getDependencyArtifacts() )
+            {
+                builder.append( artifact.getFile().getAbsolutePath() );
+                if ( ++i < getProject().getDependencyArtifacts().size() )
+                {
+                    builder.append( separator );
+                }
+            }
+            classPath = builder.toString();
+        }
+
         // The jmods directory of the JDK
         this.modulePaths.add( jmodsFolderJDK.getAbsolutePath() );
 
@@ -559,7 +600,12 @@ public class JModCreateMojo
             argsFile.println( moduleVersion );
         }
 
-        if ( !pathElements.isEmpty() )
+        if ( classPath != null && !classPath.trim().isEmpty() )
+        {
+            argsFile.println( "--class-path" );
+            argsFile.println( classPath );
+        }
+        else if ( !pathElements.isEmpty() )
         {
             argsFile.println( "--class-path" );
             //TODO: Can't this be achieved in a more elegant way?
