@@ -587,6 +587,12 @@ public class JModCreateMojo
             argsFile.println( getPlatformSeparatedList( configList ) );
         }
 
+        if ( StringUtils.isNotBlank( mainClass ) )
+        {
+            argsFile.println( "--main-class" );
+            argsFile.println( mainClass );
+        }
+
         List<String> cmdsList = handleConfigurationListWithDefault( cmds, DEFAULT_CMD_DIRECTORY );
         if ( !cmdsList.isEmpty() )
         {
