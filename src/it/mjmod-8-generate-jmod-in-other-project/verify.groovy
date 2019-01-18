@@ -28,7 +28,7 @@ assert target.isDirectory()
 File artifact = new File( basedir, "/about-cli-distribution-jmod/target/jmods/about-cli-distribution-jmod.jmod" )
 assert artifact.isFile()
 
-String[] artifactNames = [
+String[] resourceNames = [
         "classes/module-info.class",
         "classes/META-INF/MANIFEST.MF",
         "classes/mymodule/about/cli/Main.class",
@@ -54,9 +54,9 @@ while ( jarEntries.hasMoreElements() )
 }
 
 println( "Comparing the expected number of files with the actual number of files" )
-assert artifactNames.length == contents.size()
+assert resourceNames.length == contents.size()
 
-artifactNames.each{ artifactName ->
+resourceNames.each{ artifactName ->
     println( "Does ${artifactName} exist in content." )
     assert contents.contains( artifactName )
 }

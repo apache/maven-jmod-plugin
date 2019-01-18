@@ -1,4 +1,3 @@
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,59 +17,30 @@
  * under the License.
  */
 
-import java.io.*;
-import java.util.*;
-import java.util.jar.*;
-import org.codehaus.plexus.util.*;
+import java.util.jar.*
 
-boolean result = true;
+def target = new File( basedir, 'target' )
+assert ( target.exists() && target.isDirectory() ) : 'target file is missing or not a directory.'
 
-try {
-    File target = new File( basedir, "target" );
-    if ( !target.exists() || !target.isDirectory() ) {
-        System.err.println( "target file is missing or not a directory." );
-        return false;
-    }
+def artifact = new File( target, 'jmods/maven-jmod-plugin-non-default-config-libs.jmod' )
+assert ( artifact.exists() && artifact.isFile() ) : 'target file is missing or a directory.'
 
-    File artifact = new File( target, "jmods/maven-jmod-plugin-non-default-config-libs.jmod" );
-    if ( !artifact.exists() || artifact.isDirectory() ) {
-        System.err.println( "target file is missing or a directory." );
-        return false;
-    }
+def resourceNames = [
+    'lib/non-first.so',
+    'classes/module-info.class',
+    'classes/myproject/HelloWorld.class',
+] as Set
 
-    String[] artifactNames = [
-        "lib/non-first.so",
-        "classes/module-info.class",
-        "classes/myproject/HelloWorld.class",
-    ]
+def contents = [] as Set
 
-    Set contents = new HashSet();
-
-    JarFile jar = new JarFile( artifact );
-    Enumeration jarEntries = jar.entries();
-    while ( jarEntries.hasMoreElements() ) {
-        JarEntry entry = (JarEntry) jarEntries.nextElement();
-        if ( !entry.isDirectory() ) {
-            // Only compare files
-            contents.add( entry.getName() );
-        }
-    }
-
-    if  ( artifactNames.length != contents.size() ) {
-        System.err.println( "jar content size is different from the expected content size" );
-        return false;
-    }
-    for ( int i = 0; i < artifactNames.length; i++ ) {
-        String artifactName = artifactNames[i];
-        if ( !contents.contains( artifactName ) ) {
-            System.err.println( "Artifact[" + artifactName + "] not found in jar archive" );
-            return false;
-        }
+def jar = new JarFile( artifact )
+def jarEntries = jar.entries()
+while ( jarEntries.hasMoreElements() ) {
+    def entry = (JarEntry) jarEntries.nextElement()
+    if ( !entry.isDirectory() ) {
+        // Only compare files
+        contents.add( entry.getName() )
     }
 }
-catch( Throwable e ) {
-    e.printStackTrace();
-    result = false;
-}
 
-return result;
+assert resourceNames == contents

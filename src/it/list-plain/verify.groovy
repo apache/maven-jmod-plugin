@@ -1,4 +1,3 @@
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,72 +17,19 @@
  * under the License.
  */
 
-import java.io.*;
-import java.util.*;
-import java.util.jar.*;
-import org.codehaus.plexus.util.*;
+def resourceNames = [
+    'conf/config.test',
+    'classes/module-info.class',
+    'classes/myproject/HelloWorld.class',
+] as Set
 
-boolean result = true;
+def buildLog = new File (basedir, 'build.log')
 
-try {
-    File target = new File( basedir, "target" );
-    if ( !target.exists() || !target.isDirectory() ) {
-        System.err.println( "target directory is missing or not a directory." );
-        return false;
-    }
+def listLines = buildLog.readLines()
+                            .dropWhile{ !it.startsWith('[INFO] The following files are contained in the module file') }
+                            .drop(1)
+                            .takeWhile{ !it.startsWith('[INFO] ---') }
+                            .findAll{ it.startsWith('[INFO] ')}
+                            .collect{ it - '[INFO] ' } as Set
 
-    File artifact = new File( target, "jmods/maven-jmod-plugin-list-base-config.jmod" );
-    if ( !artifact.exists() || artifact.isDirectory() ) {
-        System.err.println( "the resulting jmod file is missing or a directory." );
-        return false;
-    }
-
-    String[] artifactNames = [
-        "conf/config.test",
-        "classes/module-info.class",
-        "classes/myproject/HelloWorld.class",
-    ]
-
-    Set contents = new HashSet();
-
-    JarFile jar = new JarFile( artifact );
-    Enumeration jarEntries = jar.entries();
-    while ( jarEntries.hasMoreElements() ) {
-        JarEntry entry = (JarEntry) jarEntries.nextElement();
-        if ( !entry.isDirectory() ) {
-            // Only compare files
-            contents.add( entry.getName() );
-        }
-    }
-
-    if  ( artifactNames.length != contents.size() ) {
-        System.err.println( "jar content size is different from the expected content size" );
-        return false;
-    }
-
-    for ( int i = 0; i < artifactNames.length; i++ ) {
-        String artifactName = artifactNames[i];
-        if ( !contents.contains( artifactName ) ) {
-            System.err.println( "Artifact[" + artifactName + "] not found in jar archive" );
-            return false;
-        }
-    }
-
-    def buildLog = new File (basedir, "build.log")
-
-    if (!buildLog.text.contains("[INFO] classes/module-info.class")) {
-        return false;
-    }
-    if (!buildLog.text.contains("[INFO] classes/myproject/HelloWorld.class")) {
-        return false;
-    }
-    if (!buildLog.text.contains("[INFO] conf/config.test")) {
-        return false;
-    }
-}
-catch( Throwable e ) {
-    e.printStackTrace();
-    result = false;
-}
-
-return result;
+assert listLines == resourceNames
