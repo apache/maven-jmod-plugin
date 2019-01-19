@@ -317,41 +317,6 @@ public class JModCreateMojo
         // create the jmods folder...
         modsFolder.mkdirs();
 
-//        this.modulePaths = new ArrayList<>();
-
-//        if ( pathElements != null && !pathElements.isEmpty() )
-//        {
-//            for ( Entry<String, JavaModuleDescriptor> item : pathElements.entrySet() )
-//            {
-//                // Isn't there a better solution?
-//                if ( item.getValue() == null )
-//                {
-//                    String message = "The given dependency " + item.getKey()
-//                            + " does not have a module-info.java file. So it can't be linked.";
-//                    getLog().error( message );
-//                    throw new MojoFailureException( message );
-//                }
-//                getLog().debug( "pathElements Item:" + item.getKey() + " v:" + item.getValue().name() );
-//                getLog().info( " -> module: " + item.getValue().name() + " ( " + item.getKey() + " )" );
-//                // We use the real module name and not the artifact Id...
-//                this.modulePaths.add( item.getKey() );
-//            }
-//        }
-//        else
-//        {
-//            StringBuilder builder = new StringBuilder();
-//            int i = 0;
-//            for ( Artifact artifact : getProject().getDependencyArtifacts() )
-//            {
-//                builder.append( artifact.getFile().getAbsolutePath() );
-//                if ( ++i < getProject().getDependencyArtifacts().size() )
-//                {
-//                    builder.append( File.pathSeparatorChar );
-//                }
-//            }
-//            classPath = builder.toString();
-//        }
-
         Commandline cmd;
         try
         {
@@ -539,7 +504,6 @@ public class JModCreateMojo
             {
                 getLog().warn( e.getMessage() );
             }
-
         }
         else
         {
