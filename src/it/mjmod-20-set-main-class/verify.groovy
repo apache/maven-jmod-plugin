@@ -40,7 +40,7 @@ def expectedLines = [
 
 assert describeLines == expectedLines
 
-def validateArtifact(module, artifactNames)
+def validateArtifact(module, resourceNames)
 {
     println( "Checking if ${basedir}/${module}/target exists." )
     def targetDir = new File( basedir, "/${module}/target" )
@@ -64,9 +64,9 @@ def validateArtifact(module, artifactNames)
         }
     }
 
-    assert artifactNames.size() == contents.size()
+    assert resourceNames.size() == contents.size()
 
-    artifactNames.each{ artifactName ->
+    resourceNames.each{ artifactName ->
         assert contents.contains( artifactName )
     }
 }

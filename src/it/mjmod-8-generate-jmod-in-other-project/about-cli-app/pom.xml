@@ -28,16 +28,14 @@
         <artifactId>maven-jmod-plugin-mjmod-8</artifactId>
         <version>99.0</version>
     </parent>
-
     <artifactId>about-cli-app</artifactId>
-    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
             <version>2.0.0</version>
-            <type>jar</type>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 
