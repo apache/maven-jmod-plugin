@@ -25,12 +25,9 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -60,7 +57,7 @@ import org.codehaus.plexus.util.cli.Commandline;
  * @author Karl Heinz Marbaise <a href="mailto:khmarbaise@apache.org">khmarbaise@apache.org</a>
  */
 // CHECKSTYLE_OFF: LineLength
-@Mojo( name = "create", requiresDependencyResolution = ResolutionScope.COMPILE, defaultPhase = LifecyclePhase.PACKAGE, requiresProject = true )
+@Mojo( name = "create", requiresDependencyResolution = ResolutionScope.RUNTIME, defaultPhase = LifecyclePhase.PACKAGE, requiresProject = true )
 // CHECKSTYLE_ON: LineLength
 public class JModCreateMojo
     extends AbstractJModMojo
@@ -70,8 +67,6 @@ public class JModCreateMojo
     private List<String> classpathElements;
 
     private List<String> modulepathElements;
-
-    private Map<String, JavaModuleDescriptor> pathElements;
 
     @Parameter( defaultValue = "${project.compileClasspathElements}", readonly = true, required = true )
     private List<String> compilePath;
@@ -282,17 +277,9 @@ public class JModCreateMojo
     @Parameter( defaultValue = "${project.build.directory}", required = true, readonly = true )
     private File outputDirectory;
 
-    private List<String> modulePaths;
-
-    /**
-     * Define the value for the parameter <code>--class-path &lt;path&gt;</code>, which is used when generating
-     * a jmod file from a JAR.
-     *
-     * Example: <code>jmod create --class-path &lt;JAR location&gt; &lt;full jmod destination path&gt;</code>
-     */
-    // @Parameter
-    private String classPath = "";
-
+    // calculated based on jmod(.exe)/../..
+    private File javaHome; 
+    
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
@@ -308,9 +295,9 @@ public class JModCreateMojo
         }
 
         File jModExecuteableFile = new File( jModExecutable );
-        File jModExecutableParent = jModExecuteableFile.getParentFile().getParentFile();
-        File jmodsFolderJDK = new File( jModExecutableParent, JMODS );
-        getLog().debug( "Parent: " + jModExecutableParent.getAbsolutePath() );
+        javaHome = jModExecuteableFile.getParentFile().getParentFile();
+        File jmodsFolderJDK = new File( javaHome, JMODS );
+        getLog().debug( "Parent: " + javaHome.getAbsolutePath() );
         getLog().debug( "jmodsFolder: " + jmodsFolderJDK.getAbsolutePath() );
 
         preparePaths();
@@ -330,55 +317,40 @@ public class JModCreateMojo
         // create the jmods folder...
         modsFolder.mkdirs();
 
-        this.modulePaths = new ArrayList<>();
+//        this.modulePaths = new ArrayList<>();
 
-        if ( pathElements != null && !pathElements.isEmpty() )
-        {
-            for ( Entry<String, JavaModuleDescriptor> item : pathElements.entrySet() )
-            {
-                // Isn't there a better solution?
-                if ( item.getValue() == null )
-                {
-                    String message = "The given dependency " + item.getKey()
-                            + " does not have a module-info.java file. So it can't be linked.";
-                    getLog().error( message );
-                    throw new MojoFailureException( message );
-                }
-                getLog().debug( "pathElements Item:" + item.getKey() + " v:" + item.getValue().name() );
-                getLog().info( " -> module: " + item.getValue().name() + " ( " + item.getKey() + " )" );
-                // We use the real module name and not the artifact Id...
-                this.modulePaths.add( item.getKey() );
-            }
-        }
-        /* else if ( classPath == null || classPath.trim().isEmpty() )
-        {
-            throw new MojoExecutionException( "You must either have a module in your project or the "
-                    + "'classPath' configuration set in 'maven-jmod-plugin' configuration section." );
-        } */
-        else
-        {
-            // TODO: can I improve this?
-            if ( getProject().getDependencyArtifacts().isEmpty() )
-            {
-                throw new MojoExecutionException( "You must either have a module in your project or at "
-                        + "least one JAR/JMOD in the dependency's list." );
-            }
-            String separator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
-            StringBuilder builder = new StringBuilder();
-            int i = 0;
-            for ( Artifact artifact : getProject().getDependencyArtifacts() )
-            {
-                builder.append( artifact.getFile().getAbsolutePath() );
-                if ( ++i < getProject().getDependencyArtifacts().size() )
-                {
-                    builder.append( separator );
-                }
-            }
-            classPath = builder.toString();
-        }
-
-        // The jmods directory of the JDK
-        this.modulePaths.add( jmodsFolderJDK.getAbsolutePath() );
+//        if ( pathElements != null && !pathElements.isEmpty() )
+//        {
+//            for ( Entry<String, JavaModuleDescriptor> item : pathElements.entrySet() )
+//            {
+//                // Isn't there a better solution?
+//                if ( item.getValue() == null )
+//                {
+//                    String message = "The given dependency " + item.getKey()
+//                            + " does not have a module-info.java file. So it can't be linked.";
+//                    getLog().error( message );
+//                    throw new MojoFailureException( message );
+//                }
+//                getLog().debug( "pathElements Item:" + item.getKey() + " v:" + item.getValue().name() );
+//                getLog().info( " -> module: " + item.getValue().name() + " ( " + item.getKey() + " )" );
+//                // We use the real module name and not the artifact Id...
+//                this.modulePaths.add( item.getKey() );
+//            }
+//        }
+//        else
+//        {
+//            StringBuilder builder = new StringBuilder();
+//            int i = 0;
+//            for ( Artifact artifact : getProject().getDependencyArtifacts() )
+//            {
+//                builder.append( artifact.getFile().getAbsolutePath() );
+//                if ( ++i < getProject().getDependencyArtifacts().size() )
+//                {
+//                    builder.append( File.pathSeparatorChar );
+//                }
+//            }
+//            classPath = builder.toString();
+//        }
 
         Commandline cmd;
         try
@@ -475,7 +447,10 @@ public class JModCreateMojo
     {
         List<File> list = new ArrayList<File>( project.getArtifacts().size() + 1 );
 
-        list.add( new File( project.getBuild().getOutputDirectory() ) );
+        if ( targetClassesDirectory.exists() )
+        {
+            list.add( new File( project.getBuild().getOutputDirectory() ) );
+        }
 
         for ( Artifact a : project.getArtifacts() )
         {
@@ -486,9 +461,8 @@ public class JModCreateMojo
 
     private void preparePaths()
     {
-        assert compilePath != null;
-
         boolean hasModuleDescriptor = false;
+
         // Assuming that the module-info.java is already compiled by compiler plugin so only
         // check if the module-info.class file exists.
         File moduleInfo = new File( targetClassesDirectory, "module-info.class" );
@@ -499,6 +473,8 @@ public class JModCreateMojo
             hasModuleDescriptor = true;
         }
 
+        Collection<File> dependencyArtifacts = getCompileClasspathElements( getProject() );
+
         if ( hasModuleDescriptor )
         {
             // For now only allow named modules. Once we can create a graph with ASM we can specify exactly the modules
@@ -507,14 +483,13 @@ public class JModCreateMojo
 
             modulepathElements = new ArrayList<String>();
             classpathElements = new ArrayList<String>();
-            pathElements = new LinkedHashMap<String, JavaModuleDescriptor>();
 
             ResolvePathsResult<File> resolvePathsResult;
             try
             {
-                Collection<File> dependencyArtifacts = getCompileClasspathElements( getProject() );
 
-                ResolvePathsRequest<File> request = ResolvePathsRequest.withFiles( dependencyArtifacts );
+                ResolvePathsRequest<File> request =
+                    ResolvePathsRequest.ofFiles( dependencyArtifacts ).setMainModuleDescriptor( moduleInfo );
 
                 Toolchain toolchain = getToolchain();
                 if ( toolchain != null && toolchain instanceof DefaultJavaToolChain )
@@ -548,12 +523,6 @@ public class JModCreateMojo
                     }
                 }
 
-                for ( Map.Entry<File, JavaModuleDescriptor> entry : resolvePathsResult.getPathElements().entrySet() )
-                {
-                    getLog().debug( "pathElements: " + entry.getKey().getPath() + " " + entry.getValue().name() );
-                    pathElements.put( entry.getKey().getPath(), entry.getValue() );
-                }
-
                 for ( File file : resolvePathsResult.getClasspathElements() )
                 {
                     getLog().debug( "classpathElements: File: " + file.getPath() );
@@ -574,8 +543,13 @@ public class JModCreateMojo
         }
         else
         {
-            classpathElements = compilePath;
             modulepathElements = Collections.emptyList();
+
+            classpathElements = new ArrayList<String>();
+            for ( File file : dependencyArtifacts )
+            {
+                classpathElements.add( file.getPath() );
+            }
         }
     }
 
@@ -600,23 +574,24 @@ public class JModCreateMojo
             argsFile.println( moduleVersion );
         }
 
-        if ( classPath != null && !classPath.trim().isEmpty() )
+        List<String> classPaths;
+        if ( classpathElements != null )
         {
-            argsFile.println( "--class-path" );
-            argsFile.println( classPath );
+            classPaths = new ArrayList<>( classpathElements );
         }
-        else if ( !pathElements.isEmpty() )
+        else
         {
-            argsFile.println( "--class-path" );
-            //TODO: Can't this be achieved in a more elegant way?
-            // the classpathElements do not contain the needed information?
-            ArrayList<String> x = new ArrayList<>();
-            for ( String string : pathElements.keySet() )
-            {
-                x.add( string );
-            }
-            argsFile.println( getPlatformSeparatedList( x ) );
+            classPaths = new ArrayList<>( 1 );
         }
+        if ( targetClassesDirectory.exists() )
+        {
+            classPaths.add( targetClassesDirectory.getAbsolutePath() );
+        }
+        
+        argsFile.println( "--class-path" );
+        argsFile .append( '"' )
+                 .append( getPlatformSeparatedList( classPaths ).replace( "\\", "\\\\" ) ) 
+                 .println( '"' );
 
         if ( excludes != null && !excludes.isEmpty() )
         {
@@ -675,6 +650,9 @@ public class JModCreateMojo
             argsFile.println( "--man-pages" );
             argsFile.println( getPlatformSeparatedList( manPagesList ) );
         }
+
+        List<String> modulePaths = new ArrayList<>( modulepathElements );
+        modulePaths.add( new File( javaHome, JMODS ).getAbsolutePath() );
 
         if ( modulePaths != null )
         {
@@ -760,7 +738,7 @@ public class JModCreateMojo
         return result;
     }
 
-    private String getPlatformSeparatedList( List<String> paths )
+    private String getPlatformSeparatedList( Collection<String> paths )
     {
         StringBuilder sb = new StringBuilder();
         for ( String module : paths )
