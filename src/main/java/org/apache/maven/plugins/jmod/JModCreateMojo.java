@@ -497,7 +497,14 @@ public class JModCreateMojo
                 for ( File file : resolvePathsResult.getModulepathElements().keySet() )
                 {
                     getLog().debug( "modulepathElements: File: " + file.getPath() );
-                    modulepathElements.add( file.getPath() );
+                    if ( file.isDirectory() )
+                    {
+                        modulepathElements.add( file.getPath() );
+                    }
+                    else
+                    {
+                        modulepathElements.add( file.getParent() );
+                    }
                 }
             }
             catch ( IOException e )
