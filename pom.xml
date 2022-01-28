@@ -25,7 +25,7 @@
   <parent>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-plugins</artifactId>
-    <version>34</version>
+    <version>35-SNAPSHOT</version>
     <relativePath>../maven-plugins/pom.xml</relativePath>
   </parent>
 
@@ -63,10 +63,10 @@
   </distributionManagement>
 
   <properties>
-    <mavenVersion>3.0</mavenVersion>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
-    <maven.plugin.tools.version>3.5.1</maven.plugin.tools.version>
+    <mavenVersion>4.0.0-alpha-1-SNAPSHOT</mavenVersion>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.plugin.tools.version>3.6.5-SNAPSHOT</maven.plugin.tools.version>
     <project.build.outputTimestamp>2020-04-07T21:04:00Z</project.build.outputTimestamp>
   </properties>
 
@@ -101,7 +101,7 @@
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-shared-utils</artifactId>
-      <version>3.2.1</version>
+      <version>4.0.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
@@ -121,26 +121,6 @@
             </excludes>
           </configuration>
         </plugin>
-        <plugin>
-          <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.0.0-M1</version>
-          <executions>
-            <execution>
-              <id>enforce-bytecode-version</id>
-              <configuration>
-                <rules>
-                  <enforceBytecodeVersion>
-                    <maxJdkVersion>1.7</maxJdkVersion>
-                    <excludes>
-                      <exclude>org.ow2.asm:asm</exclude>
-                    </excludes>
-                  </enforceBytecodeVersion>
-                  <requireSameVersions />
-                </rules>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
       </plugins>
     </pluginManagement>
     <resources>
@@ -149,6 +129,41 @@
         <filtering>true</filtering>
       </resource>
     </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>enforce-bytecode-version</id>
+            <configuration>
+              <rules>
+                <enforceBytecodeVersion>
+                  <maxJdkVersion>1.8</maxJdkVersion>
+                  <excludes>
+                    <exclude>org.ow2.asm:asm</exclude>
+                  </excludes>
+                </enforceBytecodeVersion>
+                <requireSameVersions />
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>extra-enforcer-rules</artifactId>
+            <version>1.5.1</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.maven.shared</groupId>
+            <artifactId>maven-dependency-tree</artifactId>
+            <version>3.1.0</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
   </build>
   <reporting>
     <plugins>
