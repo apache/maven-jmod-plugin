@@ -26,13 +26,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.utils.Os;
 import org.apache.maven.shared.utils.StringUtils;
 import org.apache.maven.shared.utils.cli.CommandLineException;
 import org.apache.maven.shared.utils.cli.CommandLineUtils;
@@ -77,7 +77,7 @@ public abstract class AbstractJModMojo extends AbstractMojo {
             jModExecutable = tc.findTool("jmod");
         }
 
-        String jModCommand = "jmod" + (SystemUtils.IS_OS_WINDOWS ? ".exe" : "");
+        String jModCommand = "jmod" + (Os.isFamily(Os.FAMILY_WINDOWS) ? ".exe" : "");
 
         File jModExe;
 
@@ -88,7 +88,7 @@ public abstract class AbstractJModMojo extends AbstractMojo {
                 jModExe = new File(jModExe, jModCommand);
             }
 
-            if (SystemUtils.IS_OS_WINDOWS && jModExe.getName().indexOf('.') < 0) {
+            if (Os.isFamily(Os.FAMILY_WINDOWS) && jModExe.getName().indexOf('.') < 0) {
                 jModExe = new File(jModExe.getPath() + ".exe");
             }
 
@@ -103,7 +103,8 @@ public abstract class AbstractJModMojo extends AbstractMojo {
         // By default, System.getProperty( "java.home" ) = JRE_HOME and JRE_HOME
         // should be in the JDK_HOME
         // ----------------------------------------------------------------------
-        jModExe = new File(SystemUtils.getJavaHome() + File.separator + ".." + File.separator + "bin", jModCommand);
+        jModExe =
+                new File(System.getProperty("java.home") + File.separator + ".." + File.separator + "bin", jModCommand);
 
         // ----------------------------------------------------------------------
         // Try to find jmod from JAVA_HOME environment variable
