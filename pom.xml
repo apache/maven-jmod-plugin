@@ -129,7 +129,7 @@
               <configuration>
                 <rules>
                   <enforceBytecodeVersion>
-                    <maxJdkVersion>1.7</maxJdkVersion>
+                    <maxJdkVersion>${maven.compiler.target}</maxJdkVersion>
                     <excludes>
                       <exclude>org.ow2.asm:asm</exclude>
                     </excludes>
