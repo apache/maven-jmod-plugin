@@ -1,5 +1,3 @@
-package org.apache.maven.plugins.jmod;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.plugins.jmod;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.plugins.jmod;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,14 +34,12 @@ import org.codehaus.plexus.util.cli.Commandline;
  * <pre>
  * jmod hash ...
  * </pre>
- * 
+ *
  * @author Karl Heinz Marbaise <a href="mailto:khmarbaise@apache.org">khmarbaise@apache.org</a>
  */
 // TODO: Reconsider resolution scope, phase ?
-@Mojo( name = "hash", requiresDependencyResolution = ResolutionScope.COMPILE, defaultPhase = LifecyclePhase.PACKAGE )
-public class JModHashMojo
-    extends AbstractJModMojo
-{
+@Mojo(name = "hash", requiresDependencyResolution = ResolutionScope.COMPILE, defaultPhase = LifecyclePhase.PACKAGE)
+public class JModHashMojo extends AbstractJModMojo {
 
     /**
      * <code>--class-path &lt;path&gt;</code> Application jar files|dir containing classes.
@@ -81,42 +78,34 @@ public class JModHashMojo
      * Define the modulepath for the <code>jmod</code> call. <code>--module-path &lt;path&gt;</code>
      * Must be a directory.
      */
-    @Parameter( required = true )
+    @Parameter(required = true)
     private File modulePath;
 
-    public void execute()
-        throws MojoExecutionException, MojoFailureException
-    {
+    public void execute() throws MojoExecutionException, MojoFailureException {
 
         String jModExecutable;
-        try
-        {
+        try {
             jModExecutable = getJModExecutable();
-        }
-        catch ( IOException e )
-        {
-            throw new MojoFailureException( "Unable to find jmod command: " + e.getMessage(), e );
+        } catch (IOException e) {
+            throw new MojoFailureException("Unable to find jmod command: " + e.getMessage(), e);
         }
 
         Commandline cmd = createJModHashCommandLine();
-        cmd.setExecutable( jModExecutable );
+        cmd.setExecutable(jModExecutable);
 
         // executeCommand( cmd, outputDirectory );
 
     }
 
-    private Commandline createJModHashCommandLine()
-    {
+    private Commandline createJModHashCommandLine() {
         Commandline cmd = new Commandline();
 
-        cmd.createArg().setValue( "hash" );
+        cmd.createArg().setValue("hash");
 
-        if ( dryRun )
-        {
-            cmd.createArg().setValue( "--dry-run" );
+        if (dryRun) {
+            cmd.createArg().setValue("--dry-run");
         }
 
         return cmd;
     }
-
 }
