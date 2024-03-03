@@ -87,11 +87,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>3.6</version>
-    </dependency>
-    <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-java</artifactId>
       <version>1.0.3</version>
