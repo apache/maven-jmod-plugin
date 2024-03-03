@@ -63,7 +63,6 @@
   <properties>
     <mavenVersion>3.6.3</mavenVersion>
     <javaVersion>8</javaVersion>
-    <maven.plugin.tools.version>3.5.1</maven.plugin.tools.version>
     <project.build.outputTimestamp>2020-04-07T21:04:00Z</project.build.outputTimestamp>
   </properties>
 
