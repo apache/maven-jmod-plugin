@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements. See the NOTICE file
@@ -18,7 +17,6 @@
   specific language governing permissions and limitations
   under the License.
 -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -44,8 +42,8 @@
   <scm>
     <connection>scm:git:https://gitbox.apache.org/repos/asf/maven-jmod-plugin.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/maven-jmod-plugin.git</developerConnection>
-    <url>https://github.com/apache/maven-jmod-plugin/tree/${project.scm.tag}</url>
     <tag>HEAD</tag>
+    <url>https://github.com/apache/maven-jmod-plugin/tree/${project.scm.tag}</url>
   </scm>
   <issueManagement>
     <system>jira</system>
@@ -105,6 +103,12 @@
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <filtering>true</filtering>
+        <directory>src/main/filtered-resources</directory>
+      </resource>
+    </resources>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -159,12 +163,6 @@
         </plugin>
       </plugins>
     </pluginManagement>
-    <resources>
-      <resource>
-        <directory>src/main/filtered-resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
   </build>
   <reporting>
     <plugins>
@@ -188,7 +186,7 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-invoker-plugin</artifactId>
             <configuration>
-                <!--
+              <!--
                   ! Prevent reading the .mavenrc or maven_pre.bat on Windows 
                   ! in integration tests.
                 -->
