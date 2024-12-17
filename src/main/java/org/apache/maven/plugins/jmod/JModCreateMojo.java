@@ -18,6 +18,8 @@
  */
 package org.apache.maven.plugins.jmod;
 
+import javax.inject.Inject;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -30,7 +32,6 @@ import java.util.Map;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -41,6 +42,7 @@ import org.apache.maven.shared.utils.cli.Commandline;
 import org.apache.maven.shared.utils.io.FileUtils;
 import org.apache.maven.shared.utils.logging.MessageUtils;
 import org.apache.maven.toolchain.Toolchain;
+import org.apache.maven.toolchain.ToolchainManager;
 import org.apache.maven.toolchain.java.DefaultJavaToolChain;
 import org.codehaus.plexus.languages.java.jpms.JavaModuleDescriptor;
 import org.codehaus.plexus.languages.java.jpms.LocationManager;
@@ -72,8 +74,7 @@ public class JModCreateMojo extends AbstractJModMojo {
     @Parameter(defaultValue = "${project.compileClasspathElements}", readonly = true, required = true)
     private List<String> compilePath;
 
-    @Component
-    private LocationManager locationManager;
+    private final LocationManager locationManager;
 
     /**
      * Specifies one or more directories containing native commands to be copied. The given directories are relative to
@@ -280,6 +281,12 @@ public class JModCreateMojo extends AbstractJModMojo {
 
     // calculated based on jmod(.exe)/../..
     private File javaHome;
+
+    @Inject
+    public JModCreateMojo(ToolchainManager toolchainManager, LocationManager locationManager) {
+        super(toolchainManager);
+        this.locationManager = locationManager;
+    }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
 

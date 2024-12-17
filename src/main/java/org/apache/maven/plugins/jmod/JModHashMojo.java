@@ -18,6 +18,8 @@
  */
 package org.apache.maven.plugins.jmod;
 
+import javax.inject.Inject;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -29,6 +31,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.shared.utils.cli.Commandline;
+import org.apache.maven.toolchain.ToolchainManager;
 
 /**
  * <pre>
@@ -80,6 +83,11 @@ public class JModHashMojo extends AbstractJModMojo {
      */
     @Parameter(required = true)
     private File modulePath;
+
+    @Inject
+    public JModHashMojo(ToolchainManager toolchainManager) {
+        super(toolchainManager);
+    }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
 
