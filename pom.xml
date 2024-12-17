@@ -96,7 +96,18 @@
       <artifactId>maven-shared-utils</artifactId>
       <version>3.4.2</version>
     </dependency>
-  </dependencies>
+    <dependency>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-shared-utils</artifactId>
+      <version>3.4.2</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <version>1</version>
+      <scope>provided</scope>
+    </dependency>
+</dependencies>
 
   <build>
     <resources>
