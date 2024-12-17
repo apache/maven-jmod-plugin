@@ -29,7 +29,6 @@ import java.util.Properties;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.utils.Os;
@@ -55,18 +54,21 @@ public abstract class AbstractJModMojo extends AbstractMojo {
     @Parameter(defaultValue = "${session}", readonly = true, required = true)
     private MavenSession session;
 
-    @Component
-    private ToolchainManager toolchainManager;
-
     /**
      * <p>
-     * Specify the requirements for this jdk toolchain. This overrules the toolchain selected by the
+     * Specify the requirements for this JDK toolchain. This overrules the toolchain selected by the
      * maven-toolchain-plugin.
      * </p>
      * <strong>note:</strong> requires at least Maven 3.3.1
      */
     @Parameter
     private Map<String, String> jdkToolchain;
+
+    private final ToolchainManager toolchainManager;
+
+    protected AbstractJModMojo(ToolchainManager toolchainManager) {
+        this.toolchainManager = toolchainManager;
+    }
 
     // TODO: Check how to prevent code duplication in maven-jlink, maven-jmod and maven-jdeps plugin?
     protected String getJModExecutable() throws IOException {

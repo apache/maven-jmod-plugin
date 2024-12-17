@@ -18,6 +18,8 @@
  */
 package org.apache.maven.plugins.jmod;
 
+import javax.inject.Inject;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -29,6 +31,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.shared.utils.cli.Commandline;
+import org.apache.maven.toolchain.ToolchainManager;
 
 /**
  * This goal is to support the usage of <code>jmod list</code> to show the content of a <code>jmod</code> file.
@@ -51,6 +54,11 @@ public class JModListMojo extends AbstractJModMojo {
             required = true)
     // @formatter:on
     private File jmodFile;
+
+    @Inject
+    public JModListMojo(ToolchainManager toolchainManager) {
+        super(toolchainManager);
+    }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
 
