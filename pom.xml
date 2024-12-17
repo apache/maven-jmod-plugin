@@ -107,7 +107,7 @@
       <version>1</version>
       <scope>provided</scope>
     </dependency>
-</dependencies>
+  </dependencies>
 
   <build>
     <resources>
