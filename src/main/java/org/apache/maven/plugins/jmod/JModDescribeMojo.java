@@ -22,8 +22,6 @@ import javax.inject.Inject;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
-import java.nio.file.Files;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -72,10 +70,6 @@ public class JModDescribeMojo extends AbstractJModMojo {
 
         getLog().debug("Toolchain in maven-jmod-plugin: jmod [ " + jModExecutable + " ]");
 
-        if (!jmodFile.exists() || !jmodFile.isFile()) {
-            throw new MojoFailureException("Unable to find " + jmodFile.getAbsolutePath());
-        }
-
         Commandline cmd;
         try {
             cmd = createJModDescribeCommandLine(jmodFile);
@@ -88,24 +82,14 @@ public class JModDescribeMojo extends AbstractJModMojo {
         executeCommand(cmd, outputDirectory);
     }
 
-    private Commandline createJModDescribeCommandLine(File resultingJModFile) throws IOException {
-        File file = new File(outputDirectory, "jmodDescribeArgs");
-        if (!getLog().isDebugEnabled()) {
-            file.deleteOnExit();
+    private Commandline createJModDescribeCommandLine() throws MojoFailureException {
+
+        if (!jmodFile.exists() || !jmodFile.isFile()) {
+            throw new MojoFailureException("Unable to find " + jmodFile.getAbsolutePath());
         }
-        file.getParentFile().mkdirs();
-        file.createNewFile();
 
-        try (Writer out = Files.newBufferedWriter(file.toPath())) {
-            out.write("describe\n");
-
-            out.write(resultingJModFile.getAbsolutePath());
-            out.write("\n");
-
-            Commandline cmd = new Commandline();
-            cmd.createArg().setValue('@' + file.getAbsolutePath());
-
-            return cmd;
-        }
+        Commandline cmd = new Commandline();
+        cmd.createArg().setValue("describe");
+        return cmd;
     }
 }

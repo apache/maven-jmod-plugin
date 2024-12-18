@@ -68,7 +68,7 @@ public class JModListMojo extends AbstractJModMojo {
             throw new MojoFailureException("Unable to find jmod command: " + e.getMessage(), e);
         }
 
-        getLog().info("Toolchain in maven-jmod-plugin: jmod [ " + jModExecutable + " ]");
+        getLog().debug("Toolchain in maven-jmod-plugin: jmod [ " + jModExecutable + " ]");
 
         Commandline cmd = createJModListCommandLine();
         cmd.setExecutable(jModExecutable);
