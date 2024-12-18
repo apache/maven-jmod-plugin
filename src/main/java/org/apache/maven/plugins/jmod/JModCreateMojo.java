@@ -545,7 +545,7 @@ public class JModCreateMojo extends AbstractJModMojo {
 
             List<String> libsList = handleConfigurationListWithDefault(libs, DEFAULT_LIB_DIRECTORY);
             if (!libsList.isEmpty()) {
-                out.write("--libs");
+                out.write("--libs\n");
                 out.write(getPlatformSeparatedList(libsList));
                 out.write('\n');
             }
