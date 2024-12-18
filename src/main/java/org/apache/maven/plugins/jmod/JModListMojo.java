@@ -60,21 +60,18 @@ public class JModListMojo extends AbstractJModMojo {
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-
-        String jModExecutable;
         try {
-            jModExecutable = getJModExecutable();
+            String jModExecutable = getJModExecutable();
+            getLog().debug("Toolchain in maven-jmod-plugin: jmod [ " + jModExecutable + " ]");
+
+            Commandline cmd = createJModListCommandLine();
+            cmd.setExecutable(jModExecutable);
+
+            getLog().info("The following files are contained in the module file " + jmodFile.getAbsolutePath());
+            executeCommand(cmd, outputDirectory);
         } catch (IOException e) {
             throw new MojoFailureException("Unable to find jmod command: " + e.getMessage(), e);
         }
-
-        getLog().debug("Toolchain in maven-jmod-plugin: jmod [ " + jModExecutable + " ]");
-
-        Commandline cmd = createJModListCommandLine();
-        cmd.setExecutable(jModExecutable);
-
-        getLog().info("The following files are contained in the module file " + jmodFile.getAbsolutePath());
-        executeCommand(cmd, outputDirectory);
     }
 
     private Commandline createJModListCommandLine() throws MojoFailureException {

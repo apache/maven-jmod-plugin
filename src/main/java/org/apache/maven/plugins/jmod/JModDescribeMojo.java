@@ -60,36 +60,28 @@ public class JModDescribeMojo extends AbstractJModMojo {
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-
-        String jModExecutable;
         try {
-            jModExecutable = getJModExecutable();
+            String jModExecutable = getJModExecutable();
+            getLog().debug("Toolchain in maven-jmod-plugin: jmod [ " + jModExecutable + " ]");
+
+            Commandline cmd = createJModDescribeCommandLine();
+            cmd.setExecutable(jModExecutable);
+
+            getLog().info("The following information is contained in the module file " + jmodFile.getAbsolutePath());
+            executeCommand(cmd, outputDirectory);
         } catch (IOException e) {
             throw new MojoFailureException("Unable to find jmod command: " + e.getMessage(), e);
         }
-
-        getLog().debug("Toolchain in maven-jmod-plugin: jmod [ " + jModExecutable + " ]");
-
-        Commandline cmd;
-        try {
-            cmd = createJModDescribeCommandLine(jmodFile);
-        } catch (IOException e) {
-            throw new MojoExecutionException(e.getMessage());
-        }
-        cmd.setExecutable(jModExecutable);
-
-        getLog().info("The following information is contained in the module file " + jmodFile.getAbsolutePath());
-        executeCommand(cmd, outputDirectory);
     }
 
     private Commandline createJModDescribeCommandLine() throws MojoFailureException {
-
         if (!jmodFile.exists() || !jmodFile.isFile()) {
             throw new MojoFailureException("Unable to find " + jmodFile.getAbsolutePath());
         }
 
-        Commandline cmd = new Commandline();
-        cmd.createArg().setValue("describe");
-        return cmd;
+        Commandline commandLine = new Commandline();
+        commandLine.createArg().setValue("describe");
+        commandLine.createArg().setValue(jmodFile.getAbsolutePath());
+        return commandLine;
     }
 }
