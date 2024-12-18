@@ -88,7 +88,7 @@ public class JModDescribeMojo extends AbstractJModMojo {
         executeCommand(cmd, outputDirectory);
     }
 
-    protected Commandline createJModDescribeCommandLine(File resultingJModFile) throws IOException {
+    private Commandline createJModDescribeCommandLine(File resultingJModFile) throws IOException {
         File file = new File(outputDirectory, "jmodDescribeArgs");
         if (!getLog().isDebugEnabled()) {
             file.deleteOnExit();
