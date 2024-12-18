@@ -22,7 +22,8 @@ import javax.inject.Inject;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.Writer;
+import java.nio.file.Files;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -95,16 +96,16 @@ public class JModListMojo extends AbstractJModMojo {
         file.getParentFile().mkdirs();
         file.createNewFile();
 
-        PrintStream argsFile = new PrintStream(file);
+        try (Writer out = Files.newBufferedWriter(file.toPath())) {
+            out.write("list\n");
 
-        argsFile.println("list");
+            out.write(resultingJModFile.getAbsolutePath());
+            out.write("\n");
 
-        argsFile.println(resultingJModFile.getAbsolutePath());
-        argsFile.close();
+            Commandline cmd = new Commandline();
+            cmd.createArg().setValue('@' + file.getAbsolutePath());
 
-        Commandline cmd = new Commandline();
-        cmd.createArg().setValue('@' + file.getAbsolutePath());
-
-        return cmd;
+            return cmd;
+        }
     }
 }
