@@ -73,6 +73,7 @@ public class JModListMojo extends AbstractJModMojo {
         Commandline cmd = createJModListCommandLine();
         cmd.setExecutable(jModExecutable);
 
+        getLog().info("The following files are contained in the module file " + jmodFile.getAbsolutePath());
         executeCommand(cmd, outputDirectory);
     }
 
