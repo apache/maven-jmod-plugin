@@ -26,8 +26,7 @@ def resourceNames = [
 def buildLog = new File (basedir, 'build.log')
 
 def listLines = buildLog.readLines()
-                            .dropWhile{ !it.startsWith('[INFO] The following files are contained in the module file') }
-                            .drop(1)
+                            .dropWhile{ !it.startsWith('[INFO] ---') }
                             .takeWhile{ !it.startsWith('[INFO] ---') }
                             .findAll{ it.startsWith('[INFO] ')}
                             .collect{ it - '[INFO] ' } as Set
