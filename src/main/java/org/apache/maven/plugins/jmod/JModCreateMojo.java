@@ -22,7 +22,8 @@ import javax.inject.Inject;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.Writer;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -490,114 +491,122 @@ public class JModCreateMojo extends AbstractJModMojo {
         file.getParentFile().mkdirs();
         file.createNewFile();
 
-        PrintStream argsFile = new PrintStream(file);
+        try (Writer out = Files.newBufferedWriter(file.toPath())) {
+            out.write("create\n");
 
-        argsFile.println("create");
+            if (moduleVersion != null) {
+                out.write("--module-version\n");
+                out.write(moduleVersion);
+                out.write('\n');
+            }
 
-        if (moduleVersion != null) {
-            argsFile.println("--module-version");
-            argsFile.println(moduleVersion);
+            List<String> classPaths;
+            if (classpathElements != null) {
+                classPaths = new ArrayList<>(classpathElements);
+            } else {
+                classPaths = new ArrayList<>(1);
+            }
+            if (targetClassesDirectory.exists()) {
+                classPaths.add(targetClassesDirectory.getAbsolutePath());
+            }
+
+            out.write("--class-path\n");
+            out.write('"');
+            out.write(getPlatformSeparatedList(classPaths).replace("\\", "\\\\"));
+            out.write("\"\n");
+
+            if (excludes != null && !excludes.isEmpty()) {
+                out.write("--exclude\n");
+                String commaSeparatedList = getCommaSeparatedList(excludes);
+                out.write('"');
+                out.write(commaSeparatedList.replace("\\", "\\\\"));
+                out.write("\"\n");
+            }
+
+            List<String> configList = handleConfigurationListWithDefault(configs, DEFAULT_CONFIG_DIRECTORY);
+            if (!configList.isEmpty()) {
+                out.write("--config\n");
+                out.write(getPlatformSeparatedList(configList));
+                out.write('\n');
+            }
+
+            if (StringUtils.isNotBlank(mainClass)) {
+                out.write("--main-class\n");
+                out.write(mainClass);
+                out.write('\n');
+            }
+
+            List<String> cmdsList = handleConfigurationListWithDefault(cmds, DEFAULT_CMD_DIRECTORY);
+            if (!cmdsList.isEmpty()) {
+                out.write("--cmds\n");
+                out.write(getPlatformSeparatedList(cmdsList));
+                out.write('\n');
+            }
+
+            List<String> libsList = handleConfigurationListWithDefault(libs, DEFAULT_LIB_DIRECTORY);
+            if (!libsList.isEmpty()) {
+                out.write("--libs");
+                out.write(getPlatformSeparatedList(libsList));
+                out.write('\n');
+            }
+
+            List<String> headerFilesList =
+                    handleConfigurationListWithDefault(headerFiles, DEFAULT_HEADER_FILES_DIRECTORY);
+            if (!headerFilesList.isEmpty()) {
+                out.write("--header-files\n");
+                out.write(getPlatformSeparatedList(headerFilesList));
+                out.write('\n');
+            }
+
+            List<String> legalNoticesList =
+                    handleConfigurationListWithDefault(legalNotices, DEFAULT_LEGAL_NOTICES_DIRECTORY);
+            if (!legalNoticesList.isEmpty()) {
+                out.write("--legal-notices\n");
+                out.write(getPlatformSeparatedList(legalNoticesList));
+                out.write('\n');
+            }
+
+            List<String> manPagesList = handleConfigurationListWithDefault(manPages, DEFAULT_MAN_PAGES_DIRECTORY);
+            if (!manPagesList.isEmpty()) {
+                out.write("--man-pages\n");
+                out.write(getPlatformSeparatedList(manPagesList));
+                out.write('\n');
+            }
+
+            List<String> modulePaths = new ArrayList<>(modulepathElements);
+            modulePaths.add(new File(javaHome, JMODS).getAbsolutePath());
+
+            if (modulePaths != null) {
+                out.write("--module-path\n");
+                out.write('"');
+                out.write(getPlatformSeparatedList(modulePaths).replace("\\", "\\\\"));
+                out.write("\"\n");
+            }
+
+            if (targetPlatform != null) {
+                out.write("--target-platform\n");
+                out.write(targetPlatform);
+                out.write('\n');
+            }
+
+            if (warnIfResolved != null) {
+                out.write("--warn-if-resolved\n");
+                out.write(warnIfResolved);
+                out.write('\n');
+            }
+
+            if (doNotResolveByDefault) {
+                out.write("--do-not-resolve-by-default\n");
+            }
+
+            out.write(resultingJModFile.getAbsolutePath());
+            out.write('\n');
+
+            Commandline cmd = new Commandline();
+            cmd.createArg().setValue('@' + file.getAbsolutePath());
+
+            return cmd;
         }
-
-        List<String> classPaths;
-        if (classpathElements != null) {
-            classPaths = new ArrayList<>(classpathElements);
-        } else {
-            classPaths = new ArrayList<>(1);
-        }
-        if (targetClassesDirectory.exists()) {
-            classPaths.add(targetClassesDirectory.getAbsolutePath());
-        }
-
-        argsFile.println("--class-path");
-        argsFile.append('"')
-                .append(getPlatformSeparatedList(classPaths).replace("\\", "\\\\"))
-                .println('"');
-
-        if (excludes != null && !excludes.isEmpty()) {
-            argsFile.println("--exclude");
-            String commaSeparatedList = getCommaSeparatedList(excludes);
-            argsFile.append('"')
-                    .append(commaSeparatedList.replace("\\", "\\\\"))
-                    .println('"');
-        }
-
-        List<String> configList = handleConfigurationListWithDefault(configs, DEFAULT_CONFIG_DIRECTORY);
-        if (!configList.isEmpty()) {
-            argsFile.println("--config");
-            // Should we quote the paths?
-            argsFile.println(getPlatformSeparatedList(configList));
-        }
-
-        if (StringUtils.isNotBlank(mainClass)) {
-            argsFile.println("--main-class");
-            argsFile.println(mainClass);
-        }
-
-        List<String> cmdsList = handleConfigurationListWithDefault(cmds, DEFAULT_CMD_DIRECTORY);
-        if (!cmdsList.isEmpty()) {
-            argsFile.println("--cmds");
-            argsFile.println(getPlatformSeparatedList(cmdsList));
-        }
-
-        List<String> libsList = handleConfigurationListWithDefault(libs, DEFAULT_LIB_DIRECTORY);
-        if (!libsList.isEmpty()) {
-            argsFile.println("--libs");
-            argsFile.println(getPlatformSeparatedList(libsList));
-        }
-
-        List<String> headerFilesList = handleConfigurationListWithDefault(headerFiles, DEFAULT_HEADER_FILES_DIRECTORY);
-        if (!headerFilesList.isEmpty()) {
-            argsFile.println("--header-files");
-            argsFile.println(getPlatformSeparatedList(headerFilesList));
-        }
-
-        List<String> legalNoticesList =
-                handleConfigurationListWithDefault(legalNotices, DEFAULT_LEGAL_NOTICES_DIRECTORY);
-        if (!legalNoticesList.isEmpty()) {
-            argsFile.println("--legal-notices");
-            argsFile.println(getPlatformSeparatedList(legalNoticesList));
-        }
-
-        List<String> manPagesList = handleConfigurationListWithDefault(manPages, DEFAULT_MAN_PAGES_DIRECTORY);
-        if (!manPagesList.isEmpty()) {
-            argsFile.println("--man-pages");
-            argsFile.println(getPlatformSeparatedList(manPagesList));
-        }
-
-        List<String> modulePaths = new ArrayList<>(modulepathElements);
-        modulePaths.add(new File(javaHome, JMODS).getAbsolutePath());
-
-        if (modulePaths != null) {
-            // @formatter:off
-            argsFile.println("--module-path");
-            argsFile.append('"')
-                    .append(getPlatformSeparatedList(modulePaths).replace("\\", "\\\\"))
-                    .println('"');
-            // @formatter:off
-        }
-
-        if (targetPlatform != null) {
-            argsFile.println("--target-platform");
-            argsFile.println(targetPlatform);
-        }
-
-        if (warnIfResolved != null) {
-            argsFile.println("--warn-if-resolved");
-            argsFile.println(warnIfResolved);
-        }
-
-        if (doNotResolveByDefault) {
-            argsFile.println("--do-not-resolve-by-default");
-        }
-
-        argsFile.println(resultingJModFile.getAbsolutePath());
-        argsFile.close();
-
-        Commandline cmd = new Commandline();
-        cmd.createArg().setValue('@' + file.getAbsolutePath());
-
-        return cmd;
     }
 
     private boolean isConfigurationDefinedInPOM(List<String> configuration) {

@@ -22,7 +22,8 @@ import javax.inject.Inject;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.Writer;
+import java.nio.file.Files;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -45,7 +46,7 @@ public class JModDescribeMojo extends AbstractJModMojo {
     private File outputDirectory;
 
     /**
-     * The name of the jmod file which is used to be examined via <code>jmod describe jmodFile</code>
+     * The name of the jmod file which is examined via <code>jmod describe jmodFile</code>
      */
     // @formatter:off
     @Parameter(
@@ -69,7 +70,7 @@ public class JModDescribeMojo extends AbstractJModMojo {
             throw new MojoFailureException("Unable to find jmod command: " + e.getMessage(), e);
         }
 
-        getLog().info("Toolchain in maven-jmod-plugin: jmod [ " + jModExecutable + " ]");
+        getLog().debug("Toolchain in maven-jmod-plugin: jmod [ " + jModExecutable + " ]");
 
         if (!jmodFile.exists() || !jmodFile.isFile()) {
             throw new MojoFailureException("Unable to find " + jmodFile.getAbsolutePath());
@@ -87,7 +88,7 @@ public class JModDescribeMojo extends AbstractJModMojo {
         executeCommand(cmd, outputDirectory);
     }
 
-    private Commandline createJModDescribeCommandLine(File resultingJModFile) throws IOException {
+    protected Commandline createJModDescribeCommandLine(File resultingJModFile) throws IOException {
         File file = new File(outputDirectory, "jmodDescribeArgs");
         if (!getLog().isDebugEnabled()) {
             file.deleteOnExit();
@@ -95,16 +96,16 @@ public class JModDescribeMojo extends AbstractJModMojo {
         file.getParentFile().mkdirs();
         file.createNewFile();
 
-        PrintStream argsFile = new PrintStream(file);
+        try (Writer out = Files.newBufferedWriter(file.toPath())) {
+            out.write("describe\n");
 
-        argsFile.println("describe");
+            out.write(resultingJModFile.getAbsolutePath());
+            out.write("\n");
 
-        argsFile.println(resultingJModFile.getAbsolutePath());
-        argsFile.close();
+            Commandline cmd = new Commandline();
+            cmd.createArg().setValue('@' + file.getAbsolutePath());
 
-        Commandline cmd = new Commandline();
-        cmd.createArg().setValue('@' + file.getAbsolutePath());
-
-        return cmd;
+            return cmd;
+        }
     }
 }
