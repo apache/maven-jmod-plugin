@@ -22,8 +22,6 @@ import javax.inject.Inject;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
-import java.nio.file.Files;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -62,50 +60,28 @@ public class JModDescribeMojo extends AbstractJModMojo {
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-
-        String jModExecutable;
         try {
-            jModExecutable = getJModExecutable();
+            String jModExecutable = getJModExecutable();
+            getLog().debug("Toolchain in maven-jmod-plugin: jmod [ " + jModExecutable + " ]");
+
+            Commandline cmd = createJModDescribeCommandLine();
+            cmd.setExecutable(jModExecutable);
+
+            getLog().info("The following information is contained in the module file " + jmodFile.getAbsolutePath());
+            executeCommand(cmd, outputDirectory);
         } catch (IOException e) {
             throw new MojoFailureException("Unable to find jmod command: " + e.getMessage(), e);
         }
+    }
 
-        getLog().debug("Toolchain in maven-jmod-plugin: jmod [ " + jModExecutable + " ]");
-
+    private Commandline createJModDescribeCommandLine() throws MojoFailureException {
         if (!jmodFile.exists() || !jmodFile.isFile()) {
             throw new MojoFailureException("Unable to find " + jmodFile.getAbsolutePath());
         }
 
-        Commandline cmd;
-        try {
-            cmd = createJModDescribeCommandLine(jmodFile);
-        } catch (IOException e) {
-            throw new MojoExecutionException(e.getMessage());
-        }
-        cmd.setExecutable(jModExecutable);
-
-        getLog().info("The following information is contained in the module file " + jmodFile.getAbsolutePath());
-        executeCommand(cmd, outputDirectory);
-    }
-
-    private Commandline createJModDescribeCommandLine(File resultingJModFile) throws IOException {
-        File file = new File(outputDirectory, "jmodDescribeArgs");
-        if (!getLog().isDebugEnabled()) {
-            file.deleteOnExit();
-        }
-        file.getParentFile().mkdirs();
-        file.createNewFile();
-
-        try (Writer out = Files.newBufferedWriter(file.toPath())) {
-            out.write("describe\n");
-
-            out.write(resultingJModFile.getAbsolutePath());
-            out.write("\n");
-
-            Commandline cmd = new Commandline();
-            cmd.createArg().setValue('@' + file.getAbsolutePath());
-
-            return cmd;
-        }
+        Commandline commandLine = new Commandline();
+        commandLine.createArg().setValue("describe");
+        commandLine.createArg().setValue(jmodFile.getAbsolutePath());
+        return commandLine;
     }
 }
