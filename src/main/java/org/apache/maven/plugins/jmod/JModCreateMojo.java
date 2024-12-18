@@ -22,8 +22,6 @@ import javax.inject.Inject;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -290,53 +288,45 @@ public class JModCreateMojo extends AbstractJModMojo {
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-
-        String jModExecutable;
         try {
-            jModExecutable = getJModExecutable();
+            String jModExecutable = getJModExecutable();
+            File jModExecuteableFile = new File(jModExecutable);
+            javaHome = jModExecuteableFile.getParentFile().getParentFile();
+            File jmodsFolderJDK = new File(javaHome, JMODS);
+            getLog().debug("Parent: " + javaHome.getAbsolutePath());
+            getLog().debug("jmodsFolder: " + jmodsFolderJDK.getAbsolutePath());
+
+            preparePaths();
+
+            failIfParametersAreNotInTheirValidValueRanges();
+
+            getLog().debug("Toolchain in maven-jmod-plugin: jmod [ " + jModExecutable + " ]");
+
+            // We need to put the resulting x.jmod files into jmods folder otherwise is
+            // seemed to be not working.
+            // Check why?
+            File modsFolder = new File(outputDirectory, "jmods");
+            File resultingJModFile = new File(modsFolder, outputFileName + ".jmod");
+
+            deleteOutputIfAlreadyExists(resultingJModFile);
+
+            // create the jmods folder...
+            modsFolder.mkdirs();
+
+            Commandline cmd = createJModCreateCommandLine(resultingJModFile);
+            cmd.setExecutable(jModExecutable);
+
+            executeCommand(cmd, outputDirectory);
+
+            if (projectHasAlreadySetAnArtifact()) {
+                throw new MojoExecutionException("You have to use a classifier "
+                        + "to attach supplemental artifacts to the project instead of replacing them.");
+            }
+
+            getProject().getArtifact().setFile(resultingJModFile);
         } catch (IOException e) {
             throw new MojoFailureException("Unable to find jmod command: " + e.getMessage(), e);
         }
-
-        File jModExecuteableFile = new File(jModExecutable);
-        javaHome = jModExecuteableFile.getParentFile().getParentFile();
-        File jmodsFolderJDK = new File(javaHome, JMODS);
-        getLog().debug("Parent: " + javaHome.getAbsolutePath());
-        getLog().debug("jmodsFolder: " + jmodsFolderJDK.getAbsolutePath());
-
-        preparePaths();
-
-        failIfParametersAreNotInTheirValidValueRanges();
-
-        getLog().info("Toolchain in maven-jmod-plugin: jmod [ " + jModExecutable + " ]");
-
-        // We need to put the resulting x.jmod files into jmods folder otherwise is
-        // seemed to be not working.
-        // Check why?
-        File modsFolder = new File(outputDirectory, "jmods");
-        File resultingJModFile = new File(modsFolder, outputFileName + ".jmod");
-
-        deleteOutputIfAlreadyExists(resultingJModFile);
-
-        // create the jmods folder...
-        modsFolder.mkdirs();
-
-        Commandline cmd;
-        try {
-            cmd = createJModCreateCommandLine(resultingJModFile);
-        } catch (IOException e) {
-            throw new MojoExecutionException(e.getMessage());
-        }
-        cmd.setExecutable(jModExecutable);
-
-        executeCommand(cmd, outputDirectory);
-
-        if (projectHasAlreadySetAnArtifact()) {
-            throw new MojoExecutionException("You have to use a classifier "
-                    + "to attach supplemental artifacts to the project instead of replacing them.");
-        }
-
-        getProject().getArtifact().setFile(resultingJModFile);
     }
 
     private void deleteOutputIfAlreadyExists(File resultingJModFile) throws MojoFailureException {
@@ -416,12 +406,12 @@ public class JModCreateMojo extends AbstractJModMojo {
         Collection<File> dependencyArtifacts = getCompileClasspathElements(getProject());
 
         if (hasModuleDescriptor) {
-            // For now only allow named modules. Once we can create a graph with ASM we can specify exactly the modules
+            // For now only allow named modules. Once we can create a graph with ASM we can specify exactly the modules,
             // and we can detect if auto modules are used. In that case, MavenProject.setFile() should not be used, so
             // you cannot depend on this project and so it won't be distributed.
 
-            modulepathElements = new ArrayList<String>();
-            classpathElements = new ArrayList<String>();
+            modulepathElements = new ArrayList<>();
+            classpathElements = new ArrayList<>();
 
             ResolvePathsResult<File> resolvePathsResult;
             try {
@@ -483,130 +473,87 @@ public class JModCreateMojo extends AbstractJModMojo {
         }
     }
 
-    private Commandline createJModCreateCommandLine(File resultingJModFile) throws IOException {
-        File file = new File(outputDirectory, "jmodCreateArgs");
-        if (!getLog().isDebugEnabled()) {
-            file.deleteOnExit();
+    private Commandline createJModCreateCommandLine(File resultingJModFile) {
+        Commandline command = new Commandline();
+        command.createArg().setValue("create");
+        if (moduleVersion != null) {
+            command.createArg().setValue("--module-version=" + moduleVersion);
         }
-        file.getParentFile().mkdirs();
-        file.createNewFile();
 
-        try (Writer out = Files.newBufferedWriter(file.toPath())) {
-            out.write("create\n");
-
-            if (moduleVersion != null) {
-                out.write("--module-version\n");
-                out.write(moduleVersion);
-                out.write('\n');
-            }
-
-            List<String> classPaths;
-            if (classpathElements != null) {
-                classPaths = new ArrayList<>(classpathElements);
-            } else {
-                classPaths = new ArrayList<>(1);
-            }
-            if (targetClassesDirectory.exists()) {
-                classPaths.add(targetClassesDirectory.getAbsolutePath());
-            }
-
-            out.write("--class-path\n");
-            out.write('"');
-            out.write(getPlatformSeparatedList(classPaths).replace("\\", "\\\\"));
-            out.write("\"\n");
-
-            if (excludes != null && !excludes.isEmpty()) {
-                out.write("--exclude\n");
-                String commaSeparatedList = getCommaSeparatedList(excludes);
-                out.write('"');
-                out.write(commaSeparatedList.replace("\\", "\\\\"));
-                out.write("\"\n");
-            }
-
-            List<String> configList = handleConfigurationListWithDefault(configs, DEFAULT_CONFIG_DIRECTORY);
-            if (!configList.isEmpty()) {
-                out.write("--config\n");
-                out.write(getPlatformSeparatedList(configList));
-                out.write('\n');
-            }
-
-            if (StringUtils.isNotBlank(mainClass)) {
-                out.write("--main-class\n");
-                out.write(mainClass);
-                out.write('\n');
-            }
-
-            List<String> cmdsList = handleConfigurationListWithDefault(cmds, DEFAULT_CMD_DIRECTORY);
-            if (!cmdsList.isEmpty()) {
-                out.write("--cmds\n");
-                out.write(getPlatformSeparatedList(cmdsList));
-                out.write('\n');
-            }
-
-            List<String> libsList = handleConfigurationListWithDefault(libs, DEFAULT_LIB_DIRECTORY);
-            if (!libsList.isEmpty()) {
-                out.write("--libs\n");
-                out.write(getPlatformSeparatedList(libsList));
-                out.write('\n');
-            }
-
-            List<String> headerFilesList =
-                    handleConfigurationListWithDefault(headerFiles, DEFAULT_HEADER_FILES_DIRECTORY);
-            if (!headerFilesList.isEmpty()) {
-                out.write("--header-files\n");
-                out.write(getPlatformSeparatedList(headerFilesList));
-                out.write('\n');
-            }
-
-            List<String> legalNoticesList =
-                    handleConfigurationListWithDefault(legalNotices, DEFAULT_LEGAL_NOTICES_DIRECTORY);
-            if (!legalNoticesList.isEmpty()) {
-                out.write("--legal-notices\n");
-                out.write(getPlatformSeparatedList(legalNoticesList));
-                out.write('\n');
-            }
-
-            List<String> manPagesList = handleConfigurationListWithDefault(manPages, DEFAULT_MAN_PAGES_DIRECTORY);
-            if (!manPagesList.isEmpty()) {
-                out.write("--man-pages\n");
-                out.write(getPlatformSeparatedList(manPagesList));
-                out.write('\n');
-            }
-
-            List<String> modulePaths = new ArrayList<>(modulepathElements);
-            modulePaths.add(new File(javaHome, JMODS).getAbsolutePath());
-
-            if (modulePaths != null) {
-                out.write("--module-path\n");
-                out.write('"');
-                out.write(getPlatformSeparatedList(modulePaths).replace("\\", "\\\\"));
-                out.write("\"\n");
-            }
-
-            if (targetPlatform != null) {
-                out.write("--target-platform\n");
-                out.write(targetPlatform);
-                out.write('\n');
-            }
-
-            if (warnIfResolved != null) {
-                out.write("--warn-if-resolved\n");
-                out.write(warnIfResolved);
-                out.write('\n');
-            }
-
-            if (doNotResolveByDefault) {
-                out.write("--do-not-resolve-by-default\n");
-            }
-
-            out.write(resultingJModFile.getAbsolutePath());
-            out.write('\n');
-
-            Commandline cmd = new Commandline();
-            cmd.createArg().setValue('@' + file.getAbsolutePath());
-
-            return cmd;
+        List<String> classPaths;
+        if (classpathElements != null) {
+            classPaths = new ArrayList<>(classpathElements);
+        } else {
+            classPaths = new ArrayList<>(1);
         }
+        if (targetClassesDirectory.exists()) {
+            classPaths.add(targetClassesDirectory.getAbsolutePath());
+        }
+
+        command.createArg()
+                .setValue("--class-path=" + getPlatformSeparatedList(classPaths).replace("\\", "\\\\"));
+
+        if (excludes != null && !excludes.isEmpty()) {
+            String commaSeparatedList = getCommaSeparatedList(excludes);
+            command.createArg().setValue("--exclude=" + commaSeparatedList.replace("\\", "\\\\"));
+        }
+
+        List<String> configList = handleConfigurationListWithDefault(configs, DEFAULT_CONFIG_DIRECTORY);
+        if (!configList.isEmpty()) {
+            command.createArg().setValue("--config=" + getPlatformSeparatedList(configList));
+        }
+
+        if (StringUtils.isNotBlank(mainClass)) {
+            command.createArg().setValue("--main-class=" + mainClass);
+        }
+
+        List<String> cmdsList = handleConfigurationListWithDefault(cmds, DEFAULT_CMD_DIRECTORY);
+        if (!cmdsList.isEmpty()) {
+            command.createArg().setValue("--cmds=" + getPlatformSeparatedList(cmdsList));
+        }
+
+        List<String> libsList = handleConfigurationListWithDefault(libs, DEFAULT_LIB_DIRECTORY);
+        if (!libsList.isEmpty()) {
+            command.createArg().setValue("--libs=" + getPlatformSeparatedList(libsList));
+        }
+
+        List<String> headerFilesList = handleConfigurationListWithDefault(headerFiles, DEFAULT_HEADER_FILES_DIRECTORY);
+        if (!headerFilesList.isEmpty()) {
+            command.createArg().setValue("--header-files=" + getPlatformSeparatedList(headerFilesList));
+        }
+
+        List<String> legalNoticesList =
+                handleConfigurationListWithDefault(legalNotices, DEFAULT_LEGAL_NOTICES_DIRECTORY);
+        if (!legalNoticesList.isEmpty()) {
+            command.createArg().setValue("--legal-notices=" + getPlatformSeparatedList(legalNoticesList));
+        }
+
+        List<String> manPagesList = handleConfigurationListWithDefault(manPages, DEFAULT_MAN_PAGES_DIRECTORY);
+        if (!manPagesList.isEmpty()) {
+            command.createArg().setValue("--man-pages=" + getPlatformSeparatedList(manPagesList));
+        }
+
+        List<String> modulePaths = new ArrayList<>(modulepathElements);
+        modulePaths.add(new File(javaHome, JMODS).getAbsolutePath());
+        command.createArg()
+                .setValue(
+                        "--module-path=" + getPlatformSeparatedList(modulePaths).replace("\\", "\\\\"));
+
+        if (targetPlatform != null) {
+            command.createArg().setValue("--target-platform=" + targetPlatform);
+        }
+
+        if (warnIfResolved != null) {
+            command.createArg().setValue("--warn-if-resolved=" + warnIfResolved);
+        }
+
+        if (doNotResolveByDefault) {
+            command.createArg().setValue("--do-not-resolve-by-default");
+        }
+
+        command.createArg().setValue(resultingJModFile.getAbsolutePath());
+
+        return command;
     }
 
     private boolean isConfigurationDefinedInPOM(List<String> configuration) {
