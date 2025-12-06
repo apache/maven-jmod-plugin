@@ -36,7 +36,7 @@
   <inceptionYear>2016</inceptionYear>
 
   <prerequisites>
-    <maven>${mavenVersion}</maven>
+    <maven>3.6.3</maven>
   </prerequisites>
 
   <scm>
@@ -51,7 +51,7 @@
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
-    <url>https://ci-builds.apache.org/job/Maven/job/maven-box/job/maven-jmod-plugin/</url>
+    <url>https://ci-maven.apache.org/job/Maven/job/maven-box/job/maven-jmod-plugin/</url>
   </ciManagement>
   <distributionManagement>
     <site>
@@ -61,10 +61,11 @@
   </distributionManagement>
 
   <properties>
-    <mavenVersion>3.6.3</mavenVersion>
+    <mavenVersion>3.9.11</mavenVersion>
     <javaVersion>8</javaVersion>
     <project.build.outputTimestamp>2020-04-07T21:04:00Z</project.build.outputTimestamp>
 
+    <version.palantirJavaFormat>2.82.0</version.palantirJavaFormat>
     <version.maven-invoker-plugin>3.9.1</version.maven-invoker-plugin>
   </properties>
 
