@@ -105,12 +105,28 @@
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-java</artifactId>
-      <version>1.0.3</version>
+      <version>1.5.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.ow2.asm</groupId>
+          <artifactId>asm</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.thoughtworks.qdox</groupId>
+          <artifactId>qdox</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-shared-utils</artifactId>
       <version>3.4.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-io</groupId>
+          <artifactId>commons-io</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>javax.inject</groupId>
@@ -142,28 +158,10 @@
             </excludes>
           </configuration>
         </plugin>
-        <plugin>
-          <artifactId>maven-enforcer-plugin</artifactId>
-          <executions>
-            <execution>
-              <id>enforce-bytecode-version</id>
-              <configuration>
-                <rules>
-                  <enforceBytecodeVersion>
-                    <maxJdkVersion>${maven.compiler.target}</maxJdkVersion>
-                    <excludes>
-                      <exclude>org.ow2.asm:asm</exclude>
-                    </excludes>
-                  </enforceBytecodeVersion>
-                  <requireSameVersions />
-                </rules>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
       </plugins>
     </pluginManagement>
   </build>
+
   <profiles>
     <profile>
       <id>run-its</id>
