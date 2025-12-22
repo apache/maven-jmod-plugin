@@ -28,7 +28,7 @@
   </parent>
 
   <artifactId>maven-jmod-plugin</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Apache Maven JMod Plugin</name>
@@ -42,7 +42,7 @@
   <scm>
     <connection>scm:git:https://gitbox.apache.org/repos/asf/maven-jmod-plugin.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/maven-jmod-plugin.git</developerConnection>
-    <tag>maven-jmod-plugin-3.0.0</tag>
+    <tag>HEAD</tag>
     <url>https://github.com/apache/maven-jmod-plugin/tree/${project.scm.tag}</url>
   </scm>
   <issueManagement>
@@ -63,7 +63,7 @@
   <properties>
     <mavenVersion>3.9.12</mavenVersion>
     <javaVersion>8</javaVersion>
-    <project.build.outputTimestamp>2025-12-22T00:54:41Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2025-12-22T00:54:55Z</project.build.outputTimestamp>
 
     <version.palantirJavaFormat>2.82.0</version.palantirJavaFormat>
     <version.maven-invoker-plugin>3.9.1</version.maven-invoker-plugin>
