@@ -174,7 +174,7 @@ public class JModCreateMojo extends AbstractJModMojo {
     private String moduleVersion;
 
     /**
-     * <code>--do-not-resolve-by-default</code> Exclude from the default root set of modules
+     * <code>--do-not-resolve-by-default</code> Exclude from the default root set of modules.
      */
     @Parameter(defaultValue = "false")
     private boolean doNotResolveByDefault;
