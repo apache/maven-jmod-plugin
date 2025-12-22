@@ -345,7 +345,7 @@ public class JModCreateMojo extends AbstractJModMojo {
     private void failIfParametersAreNotInTheirValidValueRanges() throws MojoFailureException {
         if (warnIfResolved != null) {
             String x = warnIfResolved.toLowerCase().trim();
-            if (!"deprecated".equals(x) && "deprecated-for-removal".equals(x) && "incubating".equals(x)) {
+            if (!"deprecated".equals(x) && !"deprecated-for-removal".equals(x) && !"incubating".equals(x)) {
                 String message = "The parameter warnIfResolved does not contain a valid value. "
                         + "Valid values are 'deprecated', 'deprecated-for-removal' or 'incubating'.";
                 getLog().error(message);
