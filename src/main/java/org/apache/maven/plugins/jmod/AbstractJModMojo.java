@@ -112,8 +112,8 @@ public abstract class AbstractJModMojo extends AbstractMojo {
         // Try to find jmod from JAVA_HOME environment variable
         // ----------------------------------------------------------------------
         if (!jModExe.exists() || !jModExe.isFile()) {
-            Properties env = CommandLineUtils.getSystemEnvVars();
-            String javaHome = env.getProperty("JAVA_HOME");
+            Map<String, String> env = System.getenv();
+            String javaHome = env.get("JAVA_HOME");
             if (StringUtils.isEmpty(javaHome)) {
                 throw new IOException("The environment variable JAVA_HOME is not correctly set.");
             }

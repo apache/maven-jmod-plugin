@@ -42,7 +42,7 @@ import org.apache.maven.shared.utils.io.FileUtils;
 import org.apache.maven.shared.utils.logging.MessageUtils;
 import org.apache.maven.toolchain.Toolchain;
 import org.apache.maven.toolchain.ToolchainManager;
-import org.apache.maven.toolchain.java.DefaultJavaToolChain;
+import org.apache.maven.toolchain.java.JavaToolchainImpl;
 import org.codehaus.plexus.languages.java.jpms.JavaModuleDescriptor;
 import org.codehaus.plexus.languages.java.jpms.LocationManager;
 import org.codehaus.plexus.languages.java.jpms.ModuleNameSource;
@@ -420,8 +420,8 @@ public class JModCreateMojo extends AbstractJModMojo {
                         ResolvePathsRequest.ofFiles(dependencyArtifacts).setMainModuleDescriptor(moduleInfo);
 
                 Toolchain toolchain = getToolchain();
-                if (toolchain != null && toolchain instanceof DefaultJavaToolChain) {
-                    request.setJdkHome(new File(((DefaultJavaToolChain) toolchain).getJavaHome()));
+                if (toolchain != null && toolchain instanceof JavaToolchainImpl) {
+                    request.setJdkHome(new File(((JavaToolchainImpl) toolchain).getJavaHome()));
                 }
 
                 resolvePathsResult = locationManager.resolvePaths(request);
