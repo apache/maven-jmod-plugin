@@ -18,8 +18,6 @@
  */
 package org.apache.maven.plugins.jmod;
 
-import javax.inject.Inject;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
+import javax.inject.Inject;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -295,6 +293,11 @@ public class JModCreateMojo extends AbstractJModMojo {
             File jmodsFolderJDK = new File(javaHome, JMODS);
             getLog().debug("Parent: " + javaHome.getAbsolutePath());
             getLog().debug("jmodsFolder: " + jmodsFolderJDK.getAbsolutePath());
+
+            if (!jmodsFolderJDK.exists()) {
+                throw new IOException(
+                        "JMODS folder does not exists. You might use a JDK which does not ship this anymore due to JEP 493 (Java 24).");
+            }
 
             preparePaths();
 
