@@ -58,7 +58,7 @@ public abstract class AbstractJModMojo extends AbstractMojo {
      * Specify the requirements for this JDK toolchain. This overrules the toolchain selected by the
      * maven-toolchain-plugin.
      * </p>
-     * <strong>note:</strong> requires at least Maven 3.3.1
+     * <strong>note:</strong> requires at least Maven 3.3.1.
      */
     @Parameter
     private Map<String, String> jdkToolchain;
@@ -185,10 +185,10 @@ public abstract class AbstractJModMojo extends AbstractMojo {
     }
 
     /**
-     * Convert a list into a
+     * Convert a list into a.
      *
-     * @param modules The list of modules.
-     * @return The string with the module list which is separated by {@code ,}.
+     * @param modules the list of modules
+     * @return the string with the module list which is separated by {@code ,}
      */
     protected String getCommaSeparatedList(List<String> modules) {
         StringBuilder sb = new StringBuilder();
