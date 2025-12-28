@@ -25,3 +25,8 @@ jobs:
   build:
     name: Verify
     uses: apache/maven-gh-actions-shared/.github/workflows/maven-verify.yml@v4
+    # Add another JDK to the matrix to check JEP 493 changes
+    with:
+      jdk-distribution-matrix: '[ "temurin", "zulu"]'
+      jdk-matrix: '[ "11", "17", "21", "25" ]'
+      verify-fail-fast: true
