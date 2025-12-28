@@ -29,4 +29,4 @@ jobs:
     with:
       jdk-distribution-matrix: '[ "temurin", "zulu"]'
       jdk-matrix: '[ "11", "17", "21", "25" ]'
-      verify-fail-fast: true
+      verify-fail-fast: false
