@@ -296,7 +296,7 @@ public class JModCreateMojo extends AbstractJModMojo {
 
             if (!jmodsFolderJDK.exists()) {
                 throw new IOException(
-                        "JMODS folder does not exists. You might use a JDK which does not ship this anymore due to JEP 493 (Java 24).");
+                        "JMODS folder does not exists. You might use a JDK which does not ship this anymore due to JEP 493 (Java 24). For more information also see: https://openjdk.org/jeps/493");
             }
 
             preparePaths();
