@@ -30,9 +30,6 @@ ${project.name}
 
   The JMod Plugin is used to create {{{http://openjdk.java.net/jeps/261}JMod Files}}.
 
-  NOTE: This is an alpha release which means everything can change until we reach the first
-  milestone release.
-
 * Goals Overview
 
   The JMod Plugin has currently two goals:
@@ -51,6 +48,8 @@ ${project.name}
 
   General instructions on how to use the JMod Plugin can be found on the {{{./usage.html}usage page}}. Some more
   specific use cases are described in the examples given below.
+
+  <<Java 24+ Users:>> Please be aware of the changes introduced with {{{./jep493.html}JEP 493}}!
 
   In case you still have questions regarding the plugin's usage, please have a look at the {{{./faq.html}FAQ}} and feel
   free to contact the {{{./mailing-lists.html}user mailing list}}. The posts to the mailing list are archived and could
