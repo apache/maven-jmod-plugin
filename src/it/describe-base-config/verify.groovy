@@ -25,11 +25,31 @@ def expectedDescriptorLines = [
 
 def buildLog = new File (basedir, 'build.log')
 
-def describeLines = buildLog.readLines()
-                            .dropWhile{ it != '[INFO] org.apache.maven.plugins.jmod.it.first@99.0' } 
-                            .takeWhile{ !it.startsWith('[INFO] ---') }
-                            .grep()
-                            .collect{ it - '[INFO] ' } as Set
+def describeLines = null
+
+if (mavenVersion.startsWith('4.')) {
+    /*
+    Using Maven 4 we have more INFO/DEBUG messages about copying the artifacts to repo before "BUILD SUCCESS" line.
+    Those are not interesting for the test, so we stop collecting at first "Copying" message
+
+    [INFO] Copying org.apache.maven.plugins:maven-jmod-plugin-describe-base-config:pom:99.0 to project local repository
+    [INFO] Copying org.apache.maven.plugins:maven-jmod-plugin-describe-base-config:jmod:99.0 to project local repository
+    [DEBUG] Reading file model from D:\Github\Maven\maven-jmod-plugin\target\it\describe-base-config\pom.xml
+    [INFO] Copying org.apache.maven.plugins:maven-jmod-plugin-describe-base-config:pom:consumer:99.0 to project local repository
+     */
+    describeLines = buildLog.readLines()
+            .dropWhile{ it != '[INFO] org.apache.maven.plugins.jmod.it.first@99.0' }
+            .takeWhile{ !it.startsWith('[INFO] Copying') }
+            .grep()
+            .collect{ it - '[INFO] ' } as Set
+
+} else {
+    describeLines = buildLog.readLines()
+            .dropWhile{ it != '[INFO] org.apache.maven.plugins.jmod.it.first@99.0' }
+            .takeWhile{ !it.startsWith('[INFO] ---') }
+            .grep()
+            .collect{ it - '[INFO] ' } as Set
+}
 
 assert expectedDescriptorLines == describeLines
 
