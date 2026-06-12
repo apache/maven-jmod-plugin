@@ -17,19 +17,54 @@
  * under the License.
  */
 
-def resourceNames = [
-    'conf/config.test',
-    'classes/module-info.class',
-    'classes/myproject/HelloWorld.class',
-] as Set
-
 def buildLog = new File (basedir, 'build.log')
 
-def listLines = buildLog.readLines()
-                            .dropWhile{ !it.startsWith('[INFO] The following files are contained in the module file') }
-                            .drop(1)
-                            .takeWhile{ !it.startsWith('[INFO] ---') }
-                            .findAll{ it.startsWith('[INFO] ')}
-                            .collect{ it - '[INFO] ' } as Set
+def listLines = null
+def resourceNames = null
+
+if (mavenVersion.startsWith('4.')) {
+    /*
+    Using Maven 4 we have more INFO/DEBUG messages about copying the artifacts to repo before "BUILD SUCCESS" line.
+    Those are not interesting for the test, so we stop collecting at first "Copying" message and drop another line
+
+    [INFO] The following files are contained in the module file D:\Github\Maven\maven-jmod-plugin\target\it\list-base-config\target\jmods\maven-jmod-plugin-list-base-config.jmod
+    [DEBUG] "C:\Program Files\Zulu\zulu-25\bin\jmod.exe" list D:\Github\Maven\maven-jmod-plugin\target\it\list-base-config\target\jmods\maven-jmod-plugin-list-base-config.jmod
+    [INFO] classes/module-info.class
+
+    [INFO] classes/myproject/HelloWorld.class
+
+    [INFO] conf/config.test
+    [INFO] Copying org.apache.maven.plugins:maven-jmod-plugin-list-base-config:pom:99.0 to project local repository
+    [INFO] Copying org.apache.maven.plugins:maven-jmod-plugin-list-base-config:jmod:99.0 to project local repository
+    [DEBUG] Reading file model from D:\Github\Maven\maven-jmod-plugin\target\it\list-base-config\pom.xml
+    [INFO] Copying org.apache.maven.plugins:maven-jmod-plugin-list-base-config:pom:consumer:99.0 to project local repository
+     */
+    listLines = buildLog.readLines()
+            .dropWhile { !it.startsWith('[INFO] The following files are contained in the module file') }
+            .drop(2)
+            .takeWhile{ !it.startsWith('[INFO] Copying') }
+            .grep()
+            .collect{ it - '[INFO] ' } as Set
+
+    // Also the order of log messages is different
+    resourceNames = [
+            'classes/module-info.class',
+            'classes/myproject/HelloWorld.class',
+            'conf/config.test',
+    ] as Set
+} else {
+    listLines = buildLog.readLines()
+            .dropWhile { !it.startsWith('[INFO] The following files are contained in the module file') }
+            .drop(1)
+            .takeWhile { !it.startsWith('[INFO] ---') }
+            .findAll { it.startsWith('[INFO] ') }
+            .collect { it - '[INFO] ' } as Set
+
+    resourceNames = [
+            'conf/config.test',
+            'classes/module-info.class',
+            'classes/myproject/HelloWorld.class',
+    ] as Set
+}
 
 assert listLines == resourceNames
