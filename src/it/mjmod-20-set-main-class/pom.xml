@@ -44,26 +44,22 @@
     </dependencyManagement>
 
     <build>
-        <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+        <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <!-- When this version is not set to 3.8.0, but to @version.maven-compiler-plugin@ then jar-plugin 4.0.0-beta gets pulled in which is not defined anywhere, but is the latest in my local repository.
-                    4.0.0-beta ofc is not compatible with Maven 3.9.x.
-                    if you then set the jar-plugin to @version.maven-jar-plugin@, the java module (of the module-info) gets not found -->
-                    <version>3.8.0</version>
+                    <version>@version.maven-compiler-plugin@</version>
                     <configuration>
                         <release>9</release>
                     </configuration>
                 </plugin>
-                <!--
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>@version.maven-jar-plugin@</version>
                 </plugin>
-                -->
             </plugins>
         </pluginManagement>
         <plugins>
