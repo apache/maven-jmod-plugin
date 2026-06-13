@@ -17,19 +17,47 @@
  * under the License.
  */
 
-def resourceNames = [
-    'conf/config.test',
-    'classes/module-info.class',
-    'classes/myproject/HelloWorld.class',
-] as Set
-
 def buildLog = new File (basedir, 'build.log')
 
-def listLines = buildLog.readLines()
-                            .dropWhile{ !it.startsWith('[INFO] The following files are contained in the module file') }
-                            .drop(1)
-                            .takeWhile{ !it.startsWith('[INFO] ---') }
-                            .findAll{ it.startsWith('[INFO] ')}
-                            .collect{ it - '[INFO] ' } as Set
+def listLines = null
+def resourceNames = null
+
+
+if (mavenVersion.startsWith('4.')) {
+    /*
+    Using Maven 4 we have more INFO/DEBUG messages about copying the artifacts to repo before "BUILD SUCCESS" line.
+    Those are not interesting for the test, so we stop collecting at first "Copying" message and drop another line
+     */
+    listLines = buildLog.readLines()
+            .dropWhile { !it.startsWith('[INFO] The following files are contained in the module file') }
+            .drop(2)
+            .takeWhile{ !it.startsWith('[INFO] Copying') }
+            .grep()
+            .collect{ it - '[INFO] ' } as Set
+
+    // Also the order of log messages is different
+    resourceNames = [
+            'classes/module-info.class',
+            'classes/myproject/HelloWorld.class',
+            'conf/config.test',
+    ] as Set
+} else {
+    listLines = buildLog.readLines()
+            .dropWhile { !it.startsWith('[INFO] The following files are contained in the module file') }
+            .drop(1)
+            .takeWhile { !it.startsWith('[INFO] ---') }
+            .findAll { it.startsWith('[INFO] ') }
+            .collect { it - '[INFO] ' } as Set
+
+    resourceNames = [
+            'conf/config.test',
+            'classes/module-info.class',
+            'classes/myproject/HelloWorld.class',
+    ] as Set
+}
+
+
+
+
 
 assert listLines == resourceNames
