@@ -25,18 +25,41 @@ validateArtifact( "greetings", [ "classes/module-info.class", "classes/myproject
 
 def buildLog = new File(basedir,'build.log')
 
-def describeLines = buildLog.readLines()
-                            .dropWhile{ it != '[INFO] myproject.greetings@99.0' } // start line, inclusive
-                            .takeWhile{ !it.startsWith('[INFO] ---') }            // end line, inclusive
-                            .grep()                                               // remove empty lines
-                            .collect{ it - '[INFO] ' } as Set                        // strip loglevel
+def describeLines = null
+def expectedLines = null
 
-def expectedLines = [
-                "myproject.greetings@99.0",
-                "requires java.base mandated",
-                "requires myproject.world",
-                "contains myproject.greetings",
-                "main-class myproject.greetings.Main"] as Set
+if (mavenVersion.startsWith('4.')) {
+    /*
+    Using Maven 4 we have more INFO/DEBUG messages about copying the artifacts to repo before "BUILD SUCCESS" line.
+    Those are not interesting for the test, so we stop collecting at first "Copying" message and drop another line
+     */
+    describeLines = buildLog.readLines()
+            .dropWhile{ it != '[INFO] myproject.greetings@99.0' }
+            .takeWhile{ !it.startsWith('[INFO] Copying') }
+            .grep()
+            .collect{ it - '[INFO] ' } as Set
+
+    // Also the order of log messages is different
+    expectedLines = [
+            "myproject.greetings@99.0",
+            "requires java.base mandated",
+            "requires myproject.world",
+            "contains myproject.greetings",
+            "main-class myproject.greetings.Main"] as Set
+} else {
+    describeLines = buildLog.readLines()
+            .dropWhile{ it != '[INFO] myproject.greetings@99.0' } // start line, inclusive
+            .takeWhile{ !it.startsWith('[INFO] ---') }            // end line, inclusive
+            .grep()                                               // remove empty lines
+            .collect{ it - '[INFO] ' } as Set
+
+    expectedLines = [
+            "myproject.greetings@99.0",
+            "requires java.base mandated",
+            "requires myproject.world",
+            "contains myproject.greetings",
+            "main-class myproject.greetings.Main"] as Set
+}
 
 assert describeLines == expectedLines
 
