@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -453,8 +454,13 @@ public class JModCreateMojo extends AbstractJModMojo {
                 }
 
                 for (File file : resolvePathsResult.getClasspathElements()) {
-                    getLog().debug("classpathElements: File: " + file.getPath());
-                    classpathElements.add(file.getPath());
+                    if (isJmodFile(file)) {
+                        // jmod create does not accept .jmod artifacts on --class-path.
+                        addModulePathElement(file);
+                    } else {
+                        getLog().debug("classpathElements: File: " + file.getPath());
+                        classpathElements.add(file.getPath());
+                    }
                 }
 
                 for (File file : resolvePathsResult.getModulepathElements().keySet()) {
@@ -475,6 +481,23 @@ public class JModCreateMojo extends AbstractJModMojo {
             for (File file : dependencyArtifacts) {
                 classpathElements.add(file.getPath());
             }
+        }
+
+        // Keep class/module-path entries stable and unique while preserving order.
+        classpathElements = new ArrayList<>(new LinkedHashSet<>(classpathElements));
+        modulepathElements = new ArrayList<>(new LinkedHashSet<>(modulepathElements));
+    }
+
+    private boolean isJmodFile(File file) {
+        return file.isFile() && file.getName().endsWith(".jmod");
+    }
+
+    private void addModulePathElement(File file) {
+        getLog().debug("modulepathElements (from classpath jmod): File: " + file.getPath());
+        if (file.isDirectory()) {
+            modulepathElements.add(file.getPath());
+        } else {
+            modulepathElements.add(file.getParent());
         }
     }
 
