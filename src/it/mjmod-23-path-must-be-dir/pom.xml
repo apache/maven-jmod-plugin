@@ -43,7 +43,7 @@
     </dependencyManagement>
 
     <build>
-        <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+        <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults -->
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -52,6 +52,14 @@
                     <configuration>
                         <release>9</release>
                     </configuration>
+                </plugin>
+                <!-- Pin maven-jar-plugin to the GA tracked by apache-parent. Without this,
+                     Maven 4 picks 4.0.0-beta-1 (the highest non-snapshot on Central) whose
+                     Project.getPomArtifact() call throws NoSuchMethodError against rc-5+ APIs. -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>@version.maven-jar-plugin@</version>
                 </plugin>
             </plugins>
         </pluginManagement>

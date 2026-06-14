@@ -37,7 +37,11 @@ def buildLog = new File(basedir,'build.log')
 def describeLines = buildLog.readLines()
                             .dropWhile{ it != '[INFO] myproject.greetings@99.0' } // start line, inclusive
                             .takeWhile{ !it.startsWith('[INFO] ---') }            // end line, inclusive
-                            .grep()                                               // remove empty lines
+                            // Maven 4 emits install-related '[INFO] Copying ... to project local repository'
+                            // lines and '[DEBUG] Reading file model from ...' lines between the jmod
+                            // describe output and the next mojo header; restrict to '[INFO]' lines and
+                            // reject Copying lines so neither leaks into the asserted Set.
+                            .findAll{ it.startsWith('[INFO] ') && !it.startsWith('[INFO] Copying ') }
                             .collect{ it - '[INFO] ' } as Set                        // strip loglevel
 
 def expectedLines = [
