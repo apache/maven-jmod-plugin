@@ -30,6 +30,10 @@ def listLines = buildLog.readLines()
                             .drop(1)
                             .takeWhile{ !it.startsWith('[INFO] ---') }
                             .findAll{ it.startsWith('[INFO] ')}
+                            // Maven 4 emits install-related '[INFO] Copying ... to project local repository'
+                            // lines between the jmod plugin's output and the next mojo header; reject
+                            // them so they don't leak into the asserted Set.
+                            .findAll{ !it.startsWith('[INFO] Copying ') }
                             .collect{ it - '[INFO] ' } as Set
 
 assert listLines == resourceNames
