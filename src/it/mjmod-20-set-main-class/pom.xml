@@ -54,13 +54,13 @@
                         <release>9</release>
                     </configuration>
                 </plugin>
-                <!-- Pin maven-jar-plugin to a known-good GA. Without this, Maven 4 picks
-                     the hard-coded 4.0.0-beta-1 default whose Project.getPomArtifact()
-                     call throws NoSuchMethodError against Maven 4.0.0-rc-5+ APIs. -->
+                <!-- Pin maven-jar-plugin to the GA tracked by apache-parent. Without this,
+                     Maven 4 picks 4.0.0-beta-1 (the highest non-snapshot on Central) whose
+                     Project.getPomArtifact() call throws NoSuchMethodError against rc-5+ APIs. -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.4.2</version>
+                    <version>@version.maven-jar-plugin@</version>
                 </plugin>
             </plugins>
         </pluginManagement>
