@@ -1,40 +1,32 @@
-  ------
-  Usage
-  ------
-  Karl Heinz Marbaise <khmarbaise@apache.org>
-  ------
-  2017-09-01
+<!--
+Copyright 2006 The Apache Software Foundation.
 
-~~ Copyright 2006 The Apache Software Foundation.
-~~
-~~ Licensed under the Apache License, Version 2.0 (the "License");
-~~ you may not use this file except in compliance with the License.
-~~ You may obtain a copy of the License at
-~~
-~~      http://www.apache.org/licenses/LICENSE-2.0
-~~
-~~ Unless required by applicable law or agreed to in writing, software
-~~ distributed under the License is distributed on an "AS IS" BASIS,
-~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-~~ See the License for the specific language governing permissions and
-~~ limitations under the License.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-~~ NOTE: For help with the syntax of this file, see:
-~~ http://maven.apache.org/doxia/references/apt-format.html
+http://www.apache.org/licenses/LICENSE-2.0
 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
 
-Usage
+# Usage
 
-* Introduction
+Introduction
+------------
 
-  The Maven JMod plugin is used to create {{{http://openjdk.java.net/jeps/261}JMod Files}} in JDK 9.
-  
-* Configuration of the Maven JMod Plugin
+The Maven JMod plugin is used to create [JMod Files](http://openjdk.java.net/jeps/261) in JDK 9.
 
-  To use the Maven JMod Plugin you have to configure it as an <<<extensions>>> which means
-  the configuration in your pom file has to look like this:
-  
-+-----
+Configuration of the Maven JMod Plugin
+--------------------------------------
+
+To use the Maven JMod Plugin you have to configure it as an `extensions` which means the configuration in your pom file has to look like this:
+
+```xml
 <project>
   [...]
   <build>
@@ -51,40 +43,29 @@ Usage
       </plugin>
    [...]
 </project>
-+-----
+```
 
-  The configuration elements contains the configuration for the plugin
-  {{{https://maven.apache.org/guides/mini/guide-configuring-plugins.html}like any other Maven plugin}}.
-  The different elements which can be configured for this plugin can identified by the
-  {{{./plugin-info.html}goals documentation}}.
+The configuration elements contains the configuration for the plugin [like any other Maven plugin](https://maven.apache.org/guides/mini/guide-configuring-plugins.html). The different elements which can be configured for this plugin can identified by the [goals documentation](./plugin-info.html).
 
-* Requirements
+Requirements
+------------
 
-  Based on the foundation of the plugin it is required to have JDK 9 installed. This means
-  either you have it configured via <<JAVA_HOME>> which means to run the whole
-  Maven build with JDK 9 or via <<Toolchains>>.
+Based on the foundation of the plugin it is required to have JDK 9 installed. This means either you have it configured via **JAVA\_HOME** which means to run the whole Maven build with JDK 9 or via **Toolchains**.
 
-  Howto configure Maven related to Toolchains can be read in the
-  {{{https://maven.apache.org/guides/mini/guide-using-toolchains.html}Toolchains documentation}}.
+Howto configure Maven related to Toolchains can be read in the [Toolchains documentation](https://maven.apache.org/guides/mini/guide-using-toolchains.html).
 
-* Usage of the Maven JMod Plugin
+Usage of the Maven JMod Plugin
+------------------------------
 
-  JMod files can contain supplemental configuration files, native libraries, 
-  legals notices, header files, man pages and native commands. 
-  The JMod files are intended to be used in relationship with 
-  {{{https://maven.apache.org/plugins/maven-jlink-plugin/}JLink}} to produce Java 
-  Run Time Images.
-  
-  An important thing to mention is that <<jmod>> files are not intended to be used
-  for run time and usual module relationships (You can't run a jvm via java using
-  jmod files). For such purposes <<jar>> files exists.
+JMod files can contain supplemental configuration files, native libraries, legals notices, header files, man pages and native commands. The JMod files are intended to be used in relationship with [JLink](https://maven.apache.org/plugins/maven-jlink-plugin/) to produce Java Run Time Images.
 
-  You can simply create a <<jmod>> file by defining the packaging <<jmod>> in your
-  pom file.
-  
-  The <<first-mod>> project looks similar like this (apart from the above configuration):
-  
-+-----
+An important thing to mention is that **jmod** files are not intended to be used for run time and usual module relationships (You can't run a jvm via java using jmod files). For such purposes **jar** files exists.
+
+You can simply create a **jmod** file by defining the packaging **jmod** in your pom file.
+
+The **first-mod** project looks similar like this (apart from the above configuration):
+
+```xml
 <project ...>
   <modelVersion>4.0.0</modelVersion>
    [...]
@@ -94,15 +75,11 @@ Usage
   <packaging>jmod</packaging>
    [...]
 </project>
-+-----
+```
 
-  You can put supplemental configuration files, header files, native libraries,
-  man pages into the appropriate directories. Furthermore you can add java source
-  files etc. into this module and they will be compiled and later added to the resulting
-  jmod file.
-  An example source tree looks like this:
-  
-+----
+You can put supplemental configuration files, header files, native libraries, man pages into the appropriate directories. Furthermore you can add java source files etc. into this module and they will be compiled and later added to the resulting jmod file. An example source tree looks like this:
+
+```unknown
 src/
 └── main
     ├── cmds
@@ -128,24 +105,19 @@ src/
     │   └── native-lib.so
     └── manpages
         └── the-page.man
-+----
-  
-  The above directories like <<cmds>>, <<configs>>, <<headerfiles>>, <<legalnotices>>, <<libs>>, 
-  <<manpages>> are the default directories which are defined by the Maven JMod Plugin. If you
-  really need different directories to be used
-  {{{./create-mojo.html}you can of course configure this}} but we don't recommend
-  this. You should follow convention over configuration paradigm.
+```
 
-  Finally if you like to create the <<jmod>> file this can be achieved by using 
-  the following Maven call:
-    
-+----
+The above directories like **cmds**, **configs**, **headerfiles**, **legalnotices**, **libs**, **manpages** are the default directories which are defined by the Maven JMod Plugin. If you really need different directories to be used [you can of course configure this](./create-mojo.html) but we don't recommend this. You should follow convention over configuration paradigm.
+
+Finally if you like to create the **jmod** file this can be achieved by using the following Maven call:
+
+```shell
 mvn clean package
-+----
+```
 
-  There will be some output lines like this (This is configured using toolchains):
+There will be some output lines like this (This is configured using toolchains):
 
-+----
+```unknown
 [INFO] --- maven-surefire-plugin:2.19.1:test (default-test) @ first-jmod ---
 [INFO] Toolchain in maven-surefire-plugin: JDK[/../jdk1.9.0_ea+181.jdk/Contents/Home]
 [INFO] No tests to run.
@@ -153,19 +125,18 @@ mvn clean package
 [INFO] --- maven-jmod-plugin:${project.version}:create (default-create) @ first-jmod ---
 [INFO] Toolchain in maven-jmod-plugin: jmod [ /../jdk1.9.0_ea+181.jdk/Contents/Home/bin/jmod ]
 [INFO]
-+----
+```
 
-  If you like to install the resulting <<jmod>> file you can of course use:
-  
-+----
+If you like to install the resulting **jmod** file you can of course use:
+
+```shell
 mvn clean install
-+----
-  
-  or if you like to deploy the resulting artifacts to a remote repository you have to use:
-  
-+----
+```
+
+or if you like to deploy the resulting artifacts to a remote repository you have to use:
+
+```shell
 mvn clean deploy
-+----
-  
-  The <<jmod>> files will be really installed/deployed as <<jmod>> file with the according extension.
-  
+```
+
+The **jmod** files will be really installed/deployed as **jmod** file with the according extension.
