@@ -130,13 +130,13 @@
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
           <configuration>
-            <excludes combine.children="append">
+            <inputExcludes>
               <!--
                 ! The module-info.java does not contain comments.
               -->
               <exclude>src/it/*/module-info.java</exclude>
               <exclude>README.md</exclude>
-            </excludes>
+            </inputExcludes>
           </configuration>
         </plugin>
         <plugin>
