@@ -20,8 +20,6 @@ package org.apache.maven.plugins.jmod;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -205,29 +203,10 @@ public abstract class AbstractJModMojo extends AbstractMojo {
         Toolchain tc = null;
 
         if (jdkToolchain != null) {
-            // Maven 3.3.1 has plugin execution scoped Toolchain Support
-            try {
-                Method getToolchainsMethod = toolchainManager
-                        .getClass()
-                        .getMethod("getToolchains", MavenSession.class, String.class, Map.class);
+            List<Toolchain> tcs = toolchainManager.getToolchains(session, "jdk", jdkToolchain);
 
-                @SuppressWarnings("unchecked")
-                List<Toolchain> tcs =
-                        (List<Toolchain>) getToolchainsMethod.invoke(toolchainManager, session, "jdk", jdkToolchain);
-
-                if (tcs != null && tcs.size() > 0) {
-                    tc = tcs.get(0);
-                }
-            } catch (NoSuchMethodException e) {
-                // ignore
-            } catch (SecurityException e) {
-                // ignore
-            } catch (IllegalAccessException e) {
-                // ignore
-            } catch (IllegalArgumentException e) {
-                // ignore
-            } catch (InvocationTargetException e) {
-                // ignore
+            if (tcs != null && tcs.size() > 0) {
+                tc = tcs.get(0);
             }
         }
 
