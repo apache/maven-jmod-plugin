@@ -50,8 +50,8 @@
     <url>https://github.com/apache/maven-jmod-plugin/issues/</url>
   </issueManagement>
   <ciManagement>
-    <system>Jenkins</system>
-    <url>https://ci-maven.apache.org/job/Maven/job/maven-box/job/maven-jmod-plugin/</url>
+    <system>GitHub</system>
+    <url>https://github.com/apache/maven-jmod-plugin/actions</url>
   </ciManagement>
   <distributionManagement>
     <site>
