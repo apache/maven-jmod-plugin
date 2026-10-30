@@ -62,7 +62,6 @@
 
   <properties>
     <mavenVersion>3.10.0</mavenVersion>
-    <javaVersion>8</javaVersion>
     <project.build.outputTimestamp>2025-12-22T00:54:55Z</project.build.outputTimestamp>
   </properties>
 
