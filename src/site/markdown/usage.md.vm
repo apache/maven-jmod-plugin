@@ -86,7 +86,7 @@ The **first-mod** project looks similar like this (apart from the above configur
 
 You can put supplemental configuration files, header files, native libraries, man pages into the appropriate directories. Furthermore you can add java source files etc. into this module and they will be compiled and later added to the resulting jmod file. An example source tree looks like this:
 
-```unknown
+```text
 src/
 └── main
     ├── cmds
@@ -124,7 +124,7 @@ mvn clean package
 
 There will be some output lines like this (This is configured using toolchains):
 
-```unknown
+```text
 [INFO] --- maven-surefire-plugin:2.19.1:test (default-test) @ first-jmod ---
 [INFO] Toolchain in maven-surefire-plugin: JDK[/../jdk1.9.0_ea+181.jdk/Contents/Home]
 [INFO] No tests to run.
