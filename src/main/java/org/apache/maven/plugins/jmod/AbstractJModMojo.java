@@ -28,13 +28,13 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.shared.utils.Os;
-import org.apache.maven.shared.utils.StringUtils;
 import org.apache.maven.shared.utils.cli.CommandLineException;
 import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.apache.maven.shared.utils.cli.Commandline;
 import org.apache.maven.toolchain.Toolchain;
 import org.apache.maven.toolchain.ToolchainManager;
+import org.codehaus.plexus.util.Os;
+import org.codehaus.plexus.util.StringUtils;
 
 /**
  * This contains the code to handle toolchains and the execution of the command which is similar to code in
@@ -111,7 +111,7 @@ public abstract class AbstractJModMojo extends AbstractMojo {
         if (!jModExe.exists() || !jModExe.isFile()) {
             Map<String, String> env = System.getenv();
             String javaHome = env.get("JAVA_HOME");
-            if (StringUtils.isEmpty(javaHome)) {
+            if (StringUtils.isBlank(javaHome)) {
                 throw new IOException("The environment variable JAVA_HOME is not correctly set.");
             }
             if ((!new File(javaHome).getCanonicalFile().exists())
@@ -150,7 +150,7 @@ public abstract class AbstractJModMojo extends AbstractMojo {
         try {
             int exitCode = CommandLineUtils.executeCommandLine(cmd, out, err);
 
-            String output = (StringUtils.isEmpty(out.getOutput())
+            String output = (StringUtils.isBlank(out.getOutput())
                     ? null
                     : '\n' + out.getOutput().trim());
 
