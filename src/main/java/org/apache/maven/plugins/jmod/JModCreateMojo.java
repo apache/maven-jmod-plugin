@@ -22,7 +22,6 @@ import javax.inject.Inject;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,6 +47,7 @@ import org.codehaus.plexus.languages.java.jpms.LocationManager;
 import org.codehaus.plexus.languages.java.jpms.ModuleNameSource;
 import org.codehaus.plexus.languages.java.jpms.ResolvePathsRequest;
 import org.codehaus.plexus.languages.java.jpms.ResolvePathsResult;
+import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 
 /**
@@ -339,7 +339,7 @@ public class JModCreateMojo extends AbstractJModMojo {
         if (resultingJModFile.exists() && resultingJModFile.isFile()) {
             try {
                 getLog().debug("Deleting the existing " + resultingJModFile.getAbsolutePath() + " file.");
-                Files.deleteIfExists(resultingJModFile.toPath());
+                FileUtils.forceDelete(resultingJModFile);
             } catch (IOException e) {
                 String message = "Failure during deleting of file " + resultingJModFile.getAbsolutePath();
                 getLog().error(message);
