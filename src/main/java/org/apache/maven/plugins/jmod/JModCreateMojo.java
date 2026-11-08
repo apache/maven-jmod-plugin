@@ -22,6 +22,7 @@ import javax.inject.Inject;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,9 +38,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.shared.utils.StringUtils;
 import org.apache.maven.shared.utils.cli.Commandline;
-import org.apache.maven.shared.utils.io.FileUtils;
 import org.apache.maven.shared.utils.logging.MessageUtils;
 import org.apache.maven.toolchain.Toolchain;
 import org.apache.maven.toolchain.ToolchainManager;
@@ -49,6 +48,7 @@ import org.codehaus.plexus.languages.java.jpms.LocationManager;
 import org.codehaus.plexus.languages.java.jpms.ModuleNameSource;
 import org.codehaus.plexus.languages.java.jpms.ResolvePathsRequest;
 import org.codehaus.plexus.languages.java.jpms.ResolvePathsResult;
+import org.codehaus.plexus.util.StringUtils;
 
 /**
  * The <code>create</code> goal is intended to create <code>jmod</code> files which can be used for later linking via
@@ -339,7 +339,7 @@ public class JModCreateMojo extends AbstractJModMojo {
         if (resultingJModFile.exists() && resultingJModFile.isFile()) {
             try {
                 getLog().debug("Deleting the existing " + resultingJModFile.getAbsolutePath() + " file.");
-                FileUtils.forceDelete(resultingJModFile);
+                Files.deleteIfExists(resultingJModFile.toPath());
             } catch (IOException e) {
                 String message = "Failure during deleting of file " + resultingJModFile.getAbsolutePath();
                 getLog().error(message);
