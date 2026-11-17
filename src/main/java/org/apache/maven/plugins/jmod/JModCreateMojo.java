@@ -385,7 +385,7 @@ public class JModCreateMojo extends AbstractJModMojo {
     }
 
     private List<File> getCompileClasspathElements(MavenProject project) {
-        List<File> list = new ArrayList<File>(project.getArtifacts().size() + 1);
+        List<File> list = new ArrayList<>(project.getArtifacts().size() + 1);
 
         if (targetClassesDirectory.exists()) {
             list.add(new File(project.getBuild().getOutputDirectory()));
@@ -426,7 +426,7 @@ public class JModCreateMojo extends AbstractJModMojo {
                         ResolvePathsRequest.ofFiles(dependencyArtifacts).setMainModuleDescriptor(moduleInfo);
 
                 Toolchain toolchain = getToolchain();
-                if (toolchain != null && toolchain instanceof JavaToolchainImpl) {
+                if (toolchain instanceof JavaToolchainImpl) {
                     request.setJdkHome(new File(((JavaToolchainImpl) toolchain).getJavaHome()));
                 }
 
@@ -477,7 +477,7 @@ public class JModCreateMojo extends AbstractJModMojo {
         } else {
             modulepathElements = Collections.emptyList();
 
-            classpathElements = new ArrayList<String>();
+            classpathElements = new ArrayList<>();
             for (File file : dependencyArtifacts) {
                 classpathElements.add(file.getPath());
             }
@@ -589,7 +589,7 @@ public class JModCreateMojo extends AbstractJModMojo {
     }
 
     private List<String> handleConfigurationListWithDefault(List<String> configuration, String defaultLocation) {
-        List<String> commands = new ArrayList<String>();
+        List<String> commands = new ArrayList<>();
         if (isConfigurationDefinedInPOM(configuration)) {
             commands.addAll(configuration);
         } else {

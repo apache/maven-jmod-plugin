@@ -150,9 +150,9 @@ public abstract class AbstractJModMojo extends AbstractMojo {
         try {
             int exitCode = CommandLineUtils.executeCommandLine(cmd, out, err);
 
-            String output = (StringUtils.isBlank(out.getOutput())
+            String output = StringUtils.isBlank(out.getOutput())
                     ? null
-                    : '\n' + out.getOutput().trim());
+                    : '\n' + out.getOutput().trim();
 
             if (exitCode != 0) {
                 if (StringUtils.isNotEmpty(output)) {
@@ -205,7 +205,7 @@ public abstract class AbstractJModMojo extends AbstractMojo {
         if (jdkToolchain != null) {
             List<Toolchain> tcs = toolchainManager.getToolchains(session, "jdk", jdkToolchain);
 
-            if (tcs != null && tcs.size() > 0) {
+            if (tcs != null && !tcs.isEmpty()) {
                 tc = tcs.get(0);
             }
         }
