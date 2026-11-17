@@ -80,7 +80,7 @@ public abstract class AbstractJModMojo extends AbstractMojo {
 
         File jModExe;
 
-        if (StringUtils.isNotEmpty(jModExecutable)) {
+        if (jModExecutable != null && !jModExecutable.isEmpty()) {
             jModExe = new File(jModExecutable);
 
             if (jModExe.isDirectory()) {
@@ -155,14 +155,14 @@ public abstract class AbstractJModMojo extends AbstractMojo {
                     : '\n' + out.getOutput().trim();
 
             if (exitCode != 0) {
-                if (StringUtils.isNotEmpty(output)) {
+                if (output != null && !output.isEmpty()) {
                     // Reconsider to use WARN / ERROR ?
                     getLog().info(output);
                 }
 
                 StringBuilder msg = new StringBuilder("\nExit code: ");
                 msg.append(exitCode);
-                if (StringUtils.isNotEmpty(err.getOutput())) {
+                if (err.getOutput() != null && !err.getOutput().isEmpty()) {
                     msg.append(" - ").append(err.getOutput());
                 }
                 msg.append('\n');
@@ -171,7 +171,7 @@ public abstract class AbstractJModMojo extends AbstractMojo {
                 throw new MojoExecutionException(msg.toString());
             }
 
-            if (StringUtils.isNotEmpty(output)) {
+            if (output != null && !output.isEmpty()) {
                 String[] splitLines = StringUtils.split(output, "\n");
                 for (String outputLine : splitLines) {
                     getLog().info(outputLine);
