@@ -288,6 +288,7 @@ public class JModCreateMojo extends AbstractJModMojo {
         this.locationManager = locationManager;
     }
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             String jModExecutable = getJModExecutable();
