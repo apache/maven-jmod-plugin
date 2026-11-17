@@ -80,7 +80,7 @@ public abstract class AbstractJModMojo extends AbstractMojo {
 
         File jModExe;
 
-        if (jModExecutable != null && !jModExecutable.isEmpty()) {
+        if (StringUtils.isNotEmpty(jModExecutable)) {
             jModExe = new File(jModExecutable);
 
             if (jModExe.isDirectory()) {
@@ -150,19 +150,19 @@ public abstract class AbstractJModMojo extends AbstractMojo {
         try {
             int exitCode = CommandLineUtils.executeCommandLine(cmd, out, err);
 
-            String output = StringUtils.isBlank(out.getOutput())
+            String output = (StringUtils.isBlank(out.getOutput())
                     ? null
-                    : '\n' + out.getOutput().trim();
+                    : '\n' + out.getOutput().trim());
 
             if (exitCode != 0) {
-                if (output != null && !output.isEmpty()) {
+                if (StringUtils.isNotEmpty(output)) {
                     // Reconsider to use WARN / ERROR ?
                     getLog().info(output);
                 }
 
                 StringBuilder msg = new StringBuilder("\nExit code: ");
                 msg.append(exitCode);
-                if (err.getOutput() != null && !err.getOutput().isEmpty()) {
+                if (StringUtils.isNotEmpty(err.getOutput())) {
                     msg.append(" - ").append(err.getOutput());
                 }
                 msg.append('\n');
@@ -171,7 +171,7 @@ public abstract class AbstractJModMojo extends AbstractMojo {
                 throw new MojoExecutionException(msg.toString());
             }
 
-            if (output != null && !output.isEmpty()) {
+            if (StringUtils.isNotEmpty(output)) {
                 String[] splitLines = StringUtils.split(output, "\n");
                 for (String outputLine : splitLines) {
                     getLog().info(outputLine);
