@@ -59,6 +59,7 @@ public class JModListMojo extends AbstractJModMojo {
         super(toolchainManager);
     }
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             String jModExecutable = getJModExecutable();

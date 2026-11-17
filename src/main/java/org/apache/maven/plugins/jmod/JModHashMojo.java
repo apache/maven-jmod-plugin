@@ -89,6 +89,7 @@ public class JModHashMojo extends AbstractJModMojo {
         super(toolchainManager);
     }
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
         String jModExecutable;
