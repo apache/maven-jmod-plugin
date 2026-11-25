@@ -21,44 +21,42 @@ import java.util.jar.JarEntry
 import java.util.jar.JarFile
 
 
-println( "Checking if ${basedir}/about-cli-app/target exists." )
-File target = new File( basedir, "/about-cli-app/target" )
+println("Checking if ${basedir}/about-cli-app/target exists.")
+File target = new File(basedir, "/about-cli-app/target")
 assert target.isDirectory()
 
-File artifact = new File( basedir, "/about-cli-distribution-jmod/target/jmods/about-cli-distribution-jmod.jmod" )
+File artifact = new File(basedir, "/about-cli-distribution-jmod/target/jmods/about-cli-distribution-jmod.jmod")
 assert artifact.isFile()
 
 String[] resourceNames = [
-        "classes/module-info.class",
-        "classes/META-INF/MANIFEST.MF",
-        "classes/mymodule/about/cli/Main.class",
-        "classes/META-INF/maven/org.apache.maven.plugins/about-cli-app/pom.xml",
-        "classes/META-INF/maven/org.apache.maven.plugins/about-cli-app/pom.properties",
-        "conf/about.yaml",
-        "bin/about"
+    "classes/module-info.class",
+    "classes/META-INF/MANIFEST.MF",
+    "classes/mymodule/about/cli/Main.class",
+    "classes/META-INF/maven/org.apache.maven.plugins/about-cli-app/pom.xml",
+    "classes/META-INF/maven/org.apache.maven.plugins/about-cli-app/pom.properties",
+    "conf/about.yaml",
+    "bin/about"
 ]
 
 Set contents = new HashSet()
 
-JarFile jar = new JarFile( artifact )
+JarFile jar = new JarFile(artifact)
 Enumeration jarEntries = jar.entries()
-while ( jarEntries.hasMoreElements() )
-{
+while (jarEntries.hasMoreElements()) {
     JarEntry entry = (JarEntry) jarEntries.nextElement()
-    println( "Current entry: ${entry}" )
-    if ( !entry.isDirectory() )
-    {
+    println("Current entry: ${entry}")
+    if (!entry.isDirectory()) {
         // Only compare files
-        contents.add( entry.getName() )
+        contents.add(entry.getName())
     }
 }
 
-println( "Comparing the expected number of files with the actual number of files" )
+println("Comparing the expected number of files with the actual number of files")
 assert resourceNames.length == contents.size()
 
 resourceNames.each{ artifactName ->
-    println( "Does ${artifactName} exist in content." )
-    assert contents.contains( artifactName )
+    println("Does ${artifactName} exist in content.")
+    assert contents.contains(artifactName)
 }
 
 return true

@@ -17,18 +17,16 @@
  * under the License.
  */
 
-def expectedDescriptorLines = [
-  'org.apache.maven.plugins.jmod.it.first@99.0',
-  'exports myproject',
-  'requires java.base'
-] as Set
+def expectedDescriptorLines = ['org.apache.maven.plugins.jmod.it.first@99.0', 'exports myproject', 'requires java.base'] as Set
 
-def buildLog = new File (basedir, 'build.log')
+def buildLog = new File(basedir, 'build.log')
 
 def describeLines = buildLog.readLines()
-                            .dropWhile{ it != '[INFO] org.apache.maven.plugins.jmod.it.first@99.0' } 
-                            .takeWhile{ !it.startsWith('[INFO] ---') }
-                            .grep()
-                            .collect{ it - '[INFO] ' } as Set
+        .dropWhile{
+            it != '[INFO] org.apache.maven.plugins.jmod.it.first@99.0'
+        }
+        .takeWhile{ !it.startsWith('[INFO] ---') }
+        .grep()
+        .collect{ it - '[INFO] ' } as Set
 
 assert expectedDescriptorLines == describeLines
