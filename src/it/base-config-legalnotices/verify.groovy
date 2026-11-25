@@ -19,17 +19,13 @@
 
 import java.util.jar.*
 
-def target = new File( basedir, 'target' )
-assert ( target.exists() && target.isDirectory() ) : 'target file is missing or not a directory.'
+def target = new File(basedir, 'target')
+assert (target.exists() && target.isDirectory()) : 'target file is missing or not a directory.'
 
 def artifact = new File( target, 'jmods/maven-jmod-plugin-base-config-legalnotices.jmod' )
 assert ( artifact.exists() && artifact.isFile() ) : 'target file is missing or a directory.'
 
-def resourceNames = [
-    'legal/first.md',
-    'classes/module-info.class',
-    'classes/myproject/HelloWorld.class',
-] as Set
+def resourceNames = ['legal/first.md', 'classes/module-info.class', 'classes/myproject/HelloWorld.class',] as Set
 
 def contents = [] as Set
 

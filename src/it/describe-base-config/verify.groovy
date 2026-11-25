@@ -17,23 +17,23 @@
  * under the License.
  */
 
-def expectedDescriptorLines = [
-  'org.apache.maven.plugins.jmod.it.first@99.0',
-  'exports myproject',
-  'requires java.base'
-] as Set
+def expectedDescriptorLines = ['org.apache.maven.plugins.jmod.it.first@99.0', 'exports myproject', 'requires java.base'] as Set
 
-def buildLog = new File (basedir, 'build.log')
+def buildLog = new File(basedir, 'build.log')
 
 def describeLines = buildLog.readLines()
-                            .dropWhile{ it != '[INFO] org.apache.maven.plugins.jmod.it.first@99.0' }
-                            .takeWhile{ !it.startsWith('[INFO] ---') }
-                            // Maven 4 emits install-related '[INFO] Copying ... to project local repository'
-                            // lines and '[DEBUG] Reading file model from ...' lines between the jmod
-                            // describe output and the next mojo header; restrict to '[INFO]' lines and
-                            // reject Copying lines so neither leaks into the asserted Set.
-                            .findAll{ it.startsWith('[INFO] ') && !it.startsWith('[INFO] Copying ') }
-                            .collect{ it - '[INFO] ' } as Set
+        .dropWhile{
+            it != '[INFO] org.apache.maven.plugins.jmod.it.first@99.0'
+        }
+        .takeWhile{ !it.startsWith('[INFO] ---') }
+        // Maven 4 emits install-related '[INFO] Copying ... to project local repository'
+        // lines and '[DEBUG] Reading file model from ...' lines between the jmod
+        // describe output and the next mojo header; restrict to '[INFO]' lines and
+        // reject Copying lines so neither leaks into the asserted Set.
+        .findAll{
+            it.startsWith('[INFO] ') && !it.startsWith('[INFO] Copying ')
+        }
+        .collect{ it - '[INFO] ' } as Set
 
 assert expectedDescriptorLines == describeLines
 

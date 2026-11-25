@@ -20,57 +20,63 @@
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 
-validateArtifact( "world", [ "classes/module-info.class", "classes/myproject/world/World.class" ] )
-validateArtifact( "greetings", [ "classes/module-info.class", "classes/myproject/greetings/Main.class" ] )
+validateArtifact("world", ["classes/module-info.class", "classes/myproject/world/World.class"])
+validateArtifact("greetings", ["classes/module-info.class", "classes/myproject/greetings/Main.class"])
 
 def buildLog = new File(basedir,'build.log')
 
 def describeLines = buildLog.readLines()
-                            .dropWhile{ it != '[INFO] myproject.greetings@99.0' } // start line, inclusive
-                            .takeWhile{ !it.startsWith('[INFO] ---') }            // end line, inclusive
-                            // Maven 4 emits install-related '[INFO] Copying ... to project local repository'
-                            // lines and '[DEBUG] Reading file model from ...' lines between the jmod
-                            // describe output and the next mojo header; restrict to '[INFO]' lines and
-                            // reject Copying lines so neither leaks into the asserted Set.
-                            .findAll{ it.startsWith('[INFO] ') && !it.startsWith('[INFO] Copying ') }
-                            .collect{ it - '[INFO] ' } as Set                        // strip loglevel
+        .dropWhile{
+            it != '[INFO] myproject.greetings@99.0'
+        } // start line, inclusive
+        .takeWhile{
+            !it.startsWith('[INFO] ---')
+        } // end line, inclusive
+        // Maven 4 emits install-related '[INFO] Copying ... to project local repository'
+        // lines and '[DEBUG] Reading file model from ...' lines between the jmod
+        // describe output and the next mojo header; restrict to '[INFO]' lines and
+        // reject Copying lines so neither leaks into the asserted Set.
+        .findAll{
+            it.startsWith('[INFO] ') && !it.startsWith('[INFO] Copying ')
+        }
+        .collect{
+            it - '[INFO] '
+        } as Set // strip loglevel
 
 def expectedLines = [
-                "myproject.greetings@99.0",
-                "requires java.base mandated",
-                "requires myproject.world",
-                "contains myproject.greetings",
-                "main-class myproject.greetings.Main"] as Set
+    "myproject.greetings@99.0",
+    "requires java.base mandated",
+    "requires myproject.world",
+    "contains myproject.greetings",
+    "main-class myproject.greetings.Main"
+] as Set
 
 assert describeLines == expectedLines
 
-def validateArtifact(module, resourceNames)
-{
-    println( "Checking if ${basedir}/${module}/target exists." )
-    def targetDir = new File( basedir, "/${module}/target" )
+def validateArtifact(module, resourceNames) {
+    println("Checking if ${basedir}/${module}/target exists.")
+    def targetDir = new File(basedir, "/${module}/target")
     assert targetDir.isDirectory()
 
-    File artifact = new File( targetDir, "/jmods/myproject.${module}.jmod" )
+    File artifact = new File(targetDir, "/jmods/myproject.${module}.jmod")
     assert artifact.isFile()
 
     Set contents = new HashSet()
 
-    JarFile jar = new JarFile( artifact )
+    JarFile jar = new JarFile(artifact)
     Enumeration jarEntries = jar.entries()
-    while ( jarEntries.hasMoreElements() )
-    {
+    while (jarEntries.hasMoreElements()) {
         JarEntry entry = (JarEntry) jarEntries.nextElement()
-        println( "Current entry: ${entry}" )
-        if ( !entry.isDirectory() )
-        {
+        println("Current entry: ${entry}")
+        if (!entry.isDirectory()) {
             // Only compare files
-            contents.add( entry.getName() )
+            contents.add(entry.getName())
         }
     }
 
     assert resourceNames.size() == contents.size()
 
     resourceNames.each{ artifactName ->
-        assert contents.contains( artifactName )
+        assert contents.contains(artifactName)
     }
 }

@@ -17,23 +17,21 @@
  * under the License.
  */
 
-def resourceNames = [
-    'conf/config.test',
-    'classes/module-info.class',
-    'classes/myproject/HelloWorld.class',
-] as Set
+def resourceNames = ['conf/config.test', 'classes/module-info.class', 'classes/myproject/HelloWorld.class',] as Set
 
-def buildLog = new File (basedir, 'build.log')
+def buildLog = new File(basedir, 'build.log')
 
 def listLines = buildLog.readLines()
-                            .dropWhile{ !it.startsWith('[INFO] The following files are contained in the module file') }
-                            .drop(1)
-                            .takeWhile{ !it.startsWith('[INFO] ---') }
-                            .findAll{ it.startsWith('[INFO] ')}
-                            // Maven 4 emits install-related '[INFO] Copying ... to project local repository'
-                            // lines between the jmod plugin's output and the next mojo header; reject
-                            // them so they don't leak into the asserted Set.
-                            .findAll{ !it.startsWith('[INFO] Copying ') }
-                            .collect{ it - '[INFO] ' } as Set
+        .dropWhile{
+            !it.startsWith('[INFO] The following files are contained in the module file')
+        }
+        .drop(1)
+        .takeWhile{ !it.startsWith('[INFO] ---') }
+        .findAll{ it.startsWith('[INFO] ')}
+        // Maven 4 emits install-related '[INFO] Copying ... to project local repository'
+        // lines between the jmod plugin's output and the next mojo header; reject
+        // them so they don't leak into the asserted Set.
+        .findAll{ !it.startsWith('[INFO] Copying ') }
+        .collect{ it - '[INFO] ' } as Set
 
 assert listLines == resourceNames
